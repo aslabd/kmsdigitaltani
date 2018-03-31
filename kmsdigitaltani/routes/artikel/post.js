@@ -3,7 +3,7 @@ var router = express.Router();
 
 var post = require('./../../controllers/artikel/post');
 
-router.get('/:skip/:limit', function(req, res) {
+router.get('/:skip/:limit/:terbaru/:terpopuler', function(req, res) {
 	post.getAll(req, res);
 });
 

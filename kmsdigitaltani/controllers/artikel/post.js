@@ -7,15 +7,31 @@ var Post = connection.model('Post', PostSchema);
 function PostControllers() {
 	this.getAll = function(req, res) {
 		var skip = Number(req.params.skip);
-		var limit = Number(req.params.limit); 
+		var limit = Number(req.params.limit);
+		var terbaru = req.params.terbaru;
+		var terpopuler = req.params.terpopuler;
 
-		if (skip == null || limit == null) {
+		if (skip == null || limit == null || terbaru == null || terpopuler == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Post
-				.find({}, '_id meta penulis tanggal judul ringkasan status')
+				.find()
+				.where('status').equals('terbit')
 				.skip(skip)
 				.limit(limit)
+				.select({
+					_id: 1,
+					meta: 1,
+					penulis: 1,
+					tanggal: 1,
+					judul: 1,
+					ringkasan: 1,
+					status: 1
+				})
+				.sort({
+					'meta.jumlah_baca': terpopuler,
+					'tanggal.terbit': terbaru
+				})
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
@@ -46,6 +62,22 @@ function PostControllers() {
 				.catch(function(err) {
 					res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
 				});
+		}
+	}
+
+	this.getByPenulis = function(req, res) {
+		var auth = {
+			role: 'admin'
+		}
+		var role = 'admin';
+
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (role !== auth.role) {
+			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
+		} else {
+			Post
+				.find()
 		}
 	}
 

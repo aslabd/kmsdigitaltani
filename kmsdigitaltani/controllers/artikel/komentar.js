@@ -62,11 +62,13 @@ function KomentarControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var id_post = req.body.id_post;
-			var penulis = req.body.penulis;
-			var tanggal = req.body.tanggal;
-			var isi = req.body.isi;
-			var status = req.body.status;
+			let id_post = req.body.id_post;
+			let tanggal = req.body.tanggal;
+			let isi = req.body.isi;
+			let status = req.body.status;
+
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let penulis = decoded._id;
 
 			if (id_post == null || penulis ==  null || isi == null || status == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
@@ -247,10 +249,6 @@ function KomentarControllers() {
 					res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
 				});
 		}
-	}
-
-	this.bagi = function(req, res) {
-
 	}
 }
 

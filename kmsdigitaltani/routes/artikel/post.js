@@ -3,7 +3,11 @@ var router = express.Router();
 
 var post = require('./../../controllers/artikel/post');
 
-router.get('/:skip/:limit/:terbaru/:terpopuler', function(req, res) {
+router.get('/:option/:sort', function(req, res) {
+	post.getAll(req, res);
+});
+
+router.get('/:penulis/:option/:sort', function(req, res) {
 	post.getAll(req, res);
 });
 

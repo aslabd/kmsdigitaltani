@@ -1,9 +1,10 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var Gambar = new Schema({
+module.exports = new Schema({
     pemilik: Schema.Types.ObjectId,                 
     tanggal: { 
+        terbit: { type: Date, default: Date.now },
         ubah: { type: Date, default: Date.now } 
     },
     nama: {
@@ -11,8 +12,5 @@ var Gambar = new Schema({
         sistem: String
     },
     format: { type: String, enum: ['jpg', 'jpeg', 'png'] }
-    tentang: { type: String, default: null },
     file: String
 });
-
-module.exports = mongoose.model('Gambar', Gambar);

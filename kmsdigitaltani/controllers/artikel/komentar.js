@@ -16,7 +16,7 @@ function KomentarControllers() {
 		} else {
 			Post
 				.findById(id_post)
-				.populate('komentar', 'meta tanggal penulis')
+				.populate('komentar', 'meta tanggal penulis isi')
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});

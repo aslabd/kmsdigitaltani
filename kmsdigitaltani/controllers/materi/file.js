@@ -91,7 +91,7 @@ function FileControllers() {
 
 			let storage = multer.diskStorage({
 				destination: function (req, file, cb) {
-			    	direktori = './uploads/materi/';
+			    	direktori = __dirname + '/../../uploads/materi/';
 			    	cb(null, direktori)
 				},
 				filename: function (req, file, cb) {
@@ -123,7 +123,9 @@ function FileControllers() {
 			}).single('materi');
 
 			upload(req, res, function(err) {
-				if (err) {
+				if (req.file == null || req.file == 0) {
+					res.status(400).json({status: false, message: 'File kosong.'});
+				} else if (err) {
 					res.status(500).json({status: false, message: 'Unggah berkas gagal.', err: err});
 				} else {
 					let deskripsi = req.body.deskripsi;

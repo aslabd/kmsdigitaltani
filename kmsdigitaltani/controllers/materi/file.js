@@ -111,7 +111,7 @@ function FileControllers() {
 					let allowed_mimetypes = ['application/pdf'];
 					let allowed_extensions = ['.pdf'];
 					extension = path.extname(file.originalname).toLowerCase();
-					if (file == null || !(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
+					if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
 		            	return cb(new Error('File kosong atau format file tidak diizinkan.'));
 					} else {
 						cb(null, true)
@@ -123,7 +123,7 @@ function FileControllers() {
 			}).single('materi');
 
 			upload(req, res, function(err) {
-				if (req.file == null) {
+				if (req.file == null || req.file == 0) {
 					res.status(400).json({status: false, message: 'File kosong.'});
 				} else if (err) {
 					res.status(500).json({status: false, message: 'Unggah berkas gagal.', err: err});

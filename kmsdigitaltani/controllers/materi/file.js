@@ -119,7 +119,7 @@ function FileControllers() {
 				limits: {
 					fileSize: 10 * 1024 * 1024
 				}
-			}).single('materi');
+			}).single('file');
 
 			upload(req, res, function(err) {
 				if (req.file == null || req.file == 0) {

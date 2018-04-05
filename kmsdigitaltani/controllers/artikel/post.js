@@ -168,14 +168,19 @@ function PostControllers() {
 		}
 	}
 
-	this.getBySuka = function(req, res) {
+	this.getAllBySuka = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
 
 		let role = 'admin';
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 
+		let option = JSON.parse(req.params.option);
+		console.log(option)
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 		let penyuka = decoded._id;
 
 		if (auth == false) {
@@ -185,7 +190,7 @@ function PostControllers() {
 		} else {
 			Post
 				.find()
-				.where('suka.penyuka').equals(penyuka)
+				.where('status').equals('terbit')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -197,6 +202,15 @@ function PostControllers() {
 					ringkasan: 1,
 					tag: 1
 				})
+				.exec(function(err, post) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+					} else if (post == null || post == 0) {
+						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
+					}
+				});
 		}
 	}
 

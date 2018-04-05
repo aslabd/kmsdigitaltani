@@ -1,4 +1,4 @@
-var jwt =require('jsonwebtoken')
+var jwt =require('jsonwebtoken');
 
 var connection = require('./../../connection');
 

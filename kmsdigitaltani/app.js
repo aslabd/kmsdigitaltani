@@ -1,3 +1,4 @@
+// Package yang dibutuhkan
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -5,10 +6,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+
+// Route di aplikasi
 var index = require('./routes/index');
 var user = require('./routes/user/user');
 var post = require('./routes/artikel/post');
 var komentar = require('./routes/artikel/komentar');
+var file = require('./routes/materi/file');
 
 var app = express();
 
@@ -24,6 +28,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+
+// Seluruh link menuju route
 app.use('/api/', index);
 app.use('/api/user', user);
 app.use('/api/user/*', user);
@@ -31,6 +37,8 @@ app.use('/api/artikel/post', post);
 app.use('/api/artikel/post/*', post);
 app.use('/api/artikel/komentar', komentar);
 app.use('/api/artikel/komentar/*', komentar);
+app.use('/api/materi/file', file);
+app.use('/api/materi/file/*', file);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

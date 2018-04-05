@@ -9,7 +9,7 @@ var connection = require('./../../connection');
 // skema yang dibutuhkan
 var FileSchema = require('./../../models/materi/file');
 
-// aktifkan skema ke database 
+// aktifkan skema ke database
 var File = connection.model('File', FileSchema);
 
 
@@ -66,7 +66,6 @@ function FileControllers() {
 					});
 				}
 			})
-		
 	}
 
 	this.upload = function(req, res) {

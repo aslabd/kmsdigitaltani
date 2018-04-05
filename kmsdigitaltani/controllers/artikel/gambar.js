@@ -52,7 +52,7 @@ function GambarControllers() {
 
 		Gambar
 			.findOne()
-			.where('nama.asli').equals(filename)
+			.where('nama.sistem').equals(filename)
 			.exec(function(err, gambar) {
 				if (gambar == null || gambar == 0) {
 					res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});

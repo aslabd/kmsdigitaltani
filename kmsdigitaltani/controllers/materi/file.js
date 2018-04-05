@@ -54,12 +54,12 @@ function FileControllers() {
 
 		File
 			.findOne()
-			.where('nama.asli').equals(filename)
+			.where('nama.sistem').equals(filename)
 			.exec(function(err, file) {
 				if (file == null || file == 0) {
 					res.status(204).json({status: false, message: 'File tidak ditemukan.'});
 				} else {
-					res.download(__dirname + '/../../uploads/materi/' + file.nama.sistem, filename, function(err) {
+					res.download(__dirname + '/../../uploads/materi/' + file.nama.sistem, file.nama.asli, function(err) {
 						if (err) {
 							res.status(500).json({status: false, message: 'Download materi gagal.', err: err});
 						}

@@ -11,6 +11,9 @@ module.exports = new Schema({
         asli: String,
         sistem: String
     },
-    format: { type: String, enum: ['jpg', 'jpeg', 'png'] }
-    file: String
+    ukuran: Number,
+    deskripsi: String,
+    mimetype: String,
+    extension: String,
+    direktori: String
 });

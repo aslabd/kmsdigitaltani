@@ -12,6 +12,7 @@ var index = require('./routes/index');
 var user = require('./routes/user/user');
 var post = require('./routes/artikel/post');
 var komentar = require('./routes/artikel/komentar');
+var gambar = require('./routes/artikel/gambar');
 var file = require('./routes/materi/file');
 
 var app = express();
@@ -37,6 +38,8 @@ app.use('/api/artikel/post', post);
 app.use('/api/artikel/post/*', post);
 app.use('/api/artikel/komentar', komentar);
 app.use('/api/artikel/komentar/*', komentar);
+app.use('/api/artikel/gambar', gambar);
+app.use('/api/artikel/gambar/*', gambar);
 app.use('/api/materi/file', file);
 app.use('/api/materi/file/*', file);
 

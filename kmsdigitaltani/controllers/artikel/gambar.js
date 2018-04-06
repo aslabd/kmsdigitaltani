@@ -120,10 +120,9 @@ function GambarControllers() {
 			}).single('file');
 
 			upload(req, res, function(err) {
-				// if (req.file == null || req.file == 0) {
-				// 	res.status(400).json({status: false, message: 'Gambar kosong.'});
-				// } else
-				if (err) {
+				if (req.file == null || req.file == 0) {
+					res.status(400).json({status: false, message: 'Gambar kosong.'});
+				} else if (err) {
 					res.status(500).json({status: false, message: 'Unggah gambar gagal.', err: err});
 				} else {
 					Gambar

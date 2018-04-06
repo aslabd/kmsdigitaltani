@@ -106,10 +106,9 @@ function FileControllers() {
 				storage: storage,
 				fileFilter: function(req, file, cb) {
 					ukuran = file.size;
-console.log(file)
 					mimetype = file.mimetype;
-					let allowed_mimetypes = ['application/pdf'];
-					let allowed_extensions = ['.pdf'];
+					let allowed_mimetypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'];
+					let allowed_extensions = ['.pdf', '.pptx', '.ppt'];
 					extension = path.extname(file.originalname).toLowerCase();
 					if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
 		            	return cb(new Error('File kosong atau format file tidak diizinkan.'));
@@ -123,11 +122,9 @@ console.log(file)
 			}).single('file');
 
 			upload(req, res, function(err) {
-				// if (req.file == null || req.file == 0) {
-				// 	res.status(400).json({status: false, message: 'File kosong.'});
-				// } else
-				if (err) {
-console.log(err);
+				if (req.file == null || req.file == 0) {
+					res.status(400).json({status: false, message: 'File kosong.'});
+				} else if (err) {
 					res.status(500).json({status: false, message: 'Unggah berkas gagal.', err: err});
 				} else {
 					let deskripsi = req.body.deskripsi;

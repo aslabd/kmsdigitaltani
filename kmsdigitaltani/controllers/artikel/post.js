@@ -79,7 +79,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllByPenulis = function(req, res) {
+	this.getByPenulis = function(req, res) {
 		let auth = {
 			role: 'admin'
 		}

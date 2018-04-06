@@ -49,6 +49,33 @@ function FileControllers() {
 			})
 	}
 
+	this.getByPemilik = function(req, res) {
+		let auth = {
+			role: 'admin'
+		}
+		let role = 'admin'
+
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let pemilik = decoded._id;
+
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (role !== auth.role) {
+			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
+		} else {
+			File
+				.find()
+				.where('pemilik').equals(pemilik)
+				.exec(function(err, file) {
+					if (err) {
+
+					} else if () {
+
+					}
+				})
+		}
+	}
+
 	this.getFile = function(req, res) {
 		let filename = req.params.filename;
 

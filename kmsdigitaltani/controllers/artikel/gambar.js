@@ -59,7 +59,7 @@ function GambarControllers() {
 				} else {
 					res.sendFile(path.resolve('uploads/gambar/' + gambar.nama.sistem) , function(err) {
 						if (err) {
-							res.status(500).json({status: false, message: 'Download materi gagal.', err: err});
+							res.status(500).json({status: false, message: 'Stream gambar gagal.', err: err});
 						}
 					});
 				}
@@ -135,7 +135,7 @@ function GambarControllers() {
 							direktori: direktori
 						})
 						.then(function(gambar) {
-							res.status(200).json({status: true, message: 'Unggah gambar berhasil.'});
+							res.status(200).json({status: true, message: 'Unggah gambar berhasil.', data: gambar});
 						})
 						.catch(function(err) {
 							res.status(500).json({status: false, message: 'Unggah gambar gagal.'})

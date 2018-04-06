@@ -54,7 +54,9 @@ function GambarControllers() {
 			.findOne()
 			.where('nama.sistem').equals(filename)
 			.exec(function(err, gambar) {
-				if (gambar == null || gambar == 0) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil gambar gagal.', err: err});
+				} else if (gambar == null || gambar == 0) {
 					res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
 				} else {
 					res.sendFile(path.resolve('uploads/gambar/' + gambar.nama.sistem) , function(err) {
@@ -64,6 +66,55 @@ function GambarControllers() {
 					});
 				}
 			});
+	}
+
+	this.getGambarByPemilik = function(req, res) {
+		let auth = {
+			role: 'admin'
+		}
+		let role = 'admin'
+
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let pemilik = decoded._id;
+
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (role !== auth.role) {
+			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
+		} else {
+			if (status == null) {
+				Gambar
+					.find()
+					.skip(skip)
+					.limit(limit)
+					.where('pemilik').equals(pemilik)
+					.exec(function(err, gambar) {
+						if (err) {
+							res.status(500).json({status: true, message: 'Ambil gambar saya gagal.', err: err});
+						} else if (gambar == null || gambar == 0) {
+							res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
+						} else {
+							res.status(200).json({status: true, message: 'Ambil gambar saya berhasil.', data: gambar});
+						}
+					});
+			} else {
+				Gambar
+					.find()
+					.skip(skip)
+					.limit(limit)
+					.where('pemilik').equals(pemilik)
+					.where('status').equals(status)
+					.exec(function(err, gambar) {
+						if (err) {
+							res.status(500).json({status: true, message: 'Ambil gambar saya gagal.', err: err});
+						} else if (gambar == null || gambar == 0) {
+							res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
+						} else {
+							res.status(200).json({status: true, message: 'Ambil gambar saya berhasil.', data: gambar});
+						}
+					});
+			}
+		}
 	}
 
 	this.upload = function(req, res) {

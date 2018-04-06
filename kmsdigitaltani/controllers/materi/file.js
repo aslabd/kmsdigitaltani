@@ -63,14 +63,26 @@ function FileControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
+			let option = req.params.option;
+			let skip = option.skip;
+			let limit = option.limit;
+
+			let sort = req.params.sort;
+			let terbaru = sort.terbaru;
+			let terpopuler = sort.terpopuler;
+
 			File
 				.find()
+				.skip(skip)
+				.limit(limit)
 				.where('pemilik').equals(pemilik)
 				.exec(function(err, file) {
 					if (err) {
-
-					} else if () {
-
+						res.status(500).json({status: false, message: 'Ambil materi saya gagal.', err: err});
+					} else if (file == null || file == 0) {
+						res.status(204).json({status: false, message: 'Tidak ada materi yang terambil.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil materi saya berhasil.', data: file})
 					}
 				})
 		}

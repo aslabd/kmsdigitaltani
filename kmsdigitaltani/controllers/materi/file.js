@@ -106,6 +106,7 @@ function FileControllers() {
 				storage: storage,
 				fileFilter: function(req, file, cb) {
 					ukuran = file.size;
+console.log(file)
 					mimetype = file.mimetype;
 					let allowed_mimetypes = ['application/pdf'];
 					let allowed_extensions = ['.pdf'];
@@ -126,6 +127,7 @@ function FileControllers() {
 				// 	res.status(400).json({status: false, message: 'File kosong.'});
 				// } else
 				if (err) {
+console.log(err);
 					res.status(500).json({status: false, message: 'Unggah berkas gagal.', err: err});
 				} else {
 					let deskripsi = req.body.deskripsi;

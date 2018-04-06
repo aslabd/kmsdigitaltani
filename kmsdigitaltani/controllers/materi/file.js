@@ -122,9 +122,10 @@ function FileControllers() {
 			}).single('file');
 
 			upload(req, res, function(err) {
-				if (req.file == null || req.file == 0) {
-					res.status(400).json({status: false, message: 'File kosong.'});
-				} else if (err) {
+				// if (req.file == null || req.file == 0) {
+				// 	res.status(400).json({status: false, message: 'File kosong.'});
+				// } else
+				if (err) {
 					res.status(500).json({status: false, message: 'Unggah berkas gagal.', err: err});
 				} else {
 					let deskripsi = req.body.deskripsi;

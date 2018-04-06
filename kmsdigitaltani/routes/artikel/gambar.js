@@ -11,6 +11,10 @@ router.get('/:option/:sort', function(req, res) {
 	gambar.getAll(req, res);
 });
 
+router.get('/:pemilik/:option/:sort', function(req, res) {
+	gambar.getByPemilik(req, res);
+});
+
 router.post('/upload', function(req, res) {
 	gambar.upload(req, res);
 });

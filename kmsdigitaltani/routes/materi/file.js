@@ -11,6 +11,10 @@ router.get('/:option/:sort', function(req, res) {
 	file.getAll(req, res);
 });
 
+router.get('/:pemilik/:option/:sort', function(req, res) {
+	file.getByPemilik(req, res);
+});
+
 router.post('/upload', function(req, res) {
 	file.upload(req, res);
 });

@@ -68,7 +68,7 @@ function GambarControllers() {
 			});
 	}
 
-	this.getGambarByPemilik = function(req, res) {
+	this.getByPemilik = function(req, res) {
 		let auth = {
 			role: 'admin'
 		}

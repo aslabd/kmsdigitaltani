@@ -63,11 +63,12 @@ function FileControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			let option = req.params.option;
+			let option = JSON.parse(req.params.option);
 			let skip = option.skip;
 			let limit = option.limit;
+			let status = option.status;
 
-			let sort = req.params.sort;
+			let sort = JSON.parse(req.params.sort);
 			let terbaru = sort.terbaru;
 			let terpopuler = sort.terpopuler;
 
@@ -77,6 +78,19 @@ function FileControllers() {
 					.skip(skip)
 					.limit(limit)
 					.where('pemilik').equals(pemilik)
+					.select({
+						meta: 1,
+						pemilik: 1,
+						tanggal: 1,
+						nama: 1,
+						ukuran: 1,
+						extension: 1,
+						status: 1
+					})
+					.sort({
+						'tanggal.terbit': terbaru,
+						'meta.jumlah_baca': terpopuler
+					})
 					.exec(function(err, file) {
 						if (err) {
 							res.status(500).json({status: false, message: 'Ambil materi saya gagal.', err: err});
@@ -93,6 +107,19 @@ function FileControllers() {
 					.limit(limit)
 					.where('pemilik').equals(pemilik)
 					.where('status').equals(status)
+					.select({
+						meta: 1,
+						pemilik: 1,
+						tanggal: 1,
+						nama: 1,
+						ukuran: 1,
+						extension: 1,
+						status: 1
+					})
+					.sort({
+						'tanggal.terbit': terbaru,
+						'meta.jumlah_baca': terpopuler
+					})
 					.exec(function(err, file) {
 						if (err) {
 							res.status(500).json({status: false, message: 'Ambil materi saya gagal.', err: err});

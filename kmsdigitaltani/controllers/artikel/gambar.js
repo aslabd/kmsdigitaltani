@@ -82,38 +82,37 @@ function GambarControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			if (status == null) {
-				Gambar
-					.find()
-					.skip(skip)
-					.limit(limit)
-					.where('pemilik').equals(pemilik)
-					.exec(function(err, gambar) {
-						if (err) {
-							res.status(500).json({status: true, message: 'Ambil gambar saya gagal.', err: err});
-						} else if (gambar == null || gambar == 0) {
-							res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
-						} else {
-							res.status(200).json({status: true, message: 'Ambil gambar saya berhasil.', data: gambar});
-						}
-					});
-			} else {
-				Gambar
-					.find()
-					.skip(skip)
-					.limit(limit)
-					.where('pemilik').equals(pemilik)
-					.where('status').equals(status)
-					.exec(function(err, gambar) {
-						if (err) {
-							res.status(500).json({status: true, message: 'Ambil gambar saya gagal.', err: err});
-						} else if (gambar == null || gambar == 0) {
-							res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
-						} else {
-							res.status(200).json({status: true, message: 'Ambil gambar saya berhasil.', data: gambar});
-						}
-					});
-			}
+			let option = JSON.parse(req.params.option);
+			let skip = option.skip;
+			let limit = option.limit;
+
+			let sort = JSON.parse(req.params.sort);
+			let terbaru = sort.terbaru;
+
+			Gambar
+				.find()
+				.skip(skip)
+				.limit(limit)
+				.where('pemilik').equals(pemilik)
+				.select({
+					pemilik: 1,
+					tanggal: 1,
+					nama: 1,
+					ukuran: 1,
+					extension: 1
+				})
+				.sort({
+					'tanggal.terbit': terbaru
+				})
+				.exec(function(err, gambar) {
+					if (err) {
+						res.status(500).json({status: true, message: 'Ambil gambar saya gagal.', err: err});
+					} else if (gambar == null || gambar == 0) {
+						res.status(204).json({status: false, message: 'Gambar tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil gambar saya berhasil.', data: gambar});
+					}
+				});
 		}
 	}
 

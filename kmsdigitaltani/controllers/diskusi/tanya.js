@@ -1,42 +1,27 @@
-// package yang dibutuhkan
 var jwt = require('jsonwebtoken');
 
-// koneksi database yang dibutuhkan
 var connection = require('./../../connection');
-var connectionPH = require('./../../connectionPH');;
 
-// skema yang dibutuhkan
-var PostSchema = require('./../../models/artikel/post');
-var UserSchema = require('./../../models/user/user');
+var TanyaSchema = require('./../../models/diskusi/tanya');
 
-// koneksikan skema dengan database
-var Post = connection.model('Post', PostSchema);
-var User = connectionPH.model('User', UserSchema);
+var Tanya = connection.model('Tanya', TanyaSchema);
 
-// fungsi controllers Post
-function PostControllers() {
-	// Ambil semua artikel
+function TanyaControllers() {
 	this.getAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 
-
 		let sort = JSON.parse(req.params.sort);
-		let sort_attribute;
-		if (sort.terpopuler == null || sort.terpopuler == 0) {
-			sort_attribute = 'tanggal.terbit'
-		} else {
-			sort_attribute = 'meta.jumlah.baca'
-		}
+		let terbaru = sort.terbaru;
+		let terpopuler = sort.terpopuler;
 
-		if (skip == null || limit == null) {
+		if (skip == null || limit == null || terbaru == null || terpopuler == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Post
+			Tanya
 				.find()
 				.where('status').equals('terbit')
-				.populate('penulis', 'username name email role', User)
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -49,7 +34,7 @@ function PostControllers() {
 					tag: 1
 				})
 				.sort({
-					sort_attribute: 1
+					'tanggal.terbit': terbaru
 				})
 				.exec(function(err, post) {
 					if (err) {
@@ -79,9 +64,8 @@ function PostControllers() {
 					judul: 1,
 					isi: 1,
 					status: 1,
-					tag: 1
+					tag: 1,
 				})
-				.populate('penulis', 'username name email role', User)
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
@@ -94,7 +78,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllByPenulis = function(req, res) {
+	this.getByPenulis = function(req, res) {
 		let auth = {
 			role: 'admin'
 		}
@@ -117,12 +101,8 @@ function PostControllers() {
 			let status = option.status;
 
 			let sort = JSON.parse(req.params.sort);
-			let sort_attribute;
-			if (sort.terpopuler == null || sort.terpopuler == 0) {
-				sort_attribute = 'tanggal.ubah'
-			} else {
-				sort_attribute = 'meta.jumlah.baca';
-			}
+			let terbaru = sort.terbaru;
+			let terpopuler = sort.terpopuler;
 
 			if (status == null) {
 				Post
@@ -140,9 +120,9 @@ function PostControllers() {
 						status: 1,
 						tag: 1
 					})
-					.populate('penulis', 'username name email role', User)
 					.sort({
-						sort_attribute: 1
+						'tanggal.ubah': terbaru,
+						'meta.jumlah_baca': terpopuler
 					})
 					.exec(function(err, post) {
 						if (err) {
@@ -170,9 +150,9 @@ function PostControllers() {
 						status: 1,
 						tag: 1
 					})
-					.populate('penulis', 'username name email role', User)
 					.sort({
-						sort_attribute: 1
+						'tanggal.ubah': terbaru,
+						'meta.jumlah_baca': terpopuler
 					})
 					.exec(function(err, post) {
 						if (err) {
@@ -195,16 +175,9 @@ function PostControllers() {
 		let role = 'admin';
 
 		let option = JSON.parse(req.params.option);
+		console.log(option)
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
-
-		let sort = JSON.parse(req.params.sort);
-		let sort_attribute;
-		if (sort.terpopuler == null || sort.terpopuler == 0) {
-			sort_attribute = 'tanggal.terbit';
-		} else {
-			sort_attribute = 'meta.jumlah.baca';
-		}
 
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 		let penyuka = decoded._id;
@@ -217,7 +190,6 @@ function PostControllers() {
 			Post
 				.find()
 				.where('status').equals('terbit')
-				.where('suka.penyuka').equals(penyuka)
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -228,10 +200,6 @@ function PostControllers() {
 					judul: 1,
 					ringkasan: 1,
 					tag: 1
-				})
-				.populate('penulis', 'username name email role', User)
-				.sort({
-					sort_attribute: 1
 				})
 				.exec(function(err, post) {
 					if (err) {
@@ -406,6 +374,49 @@ function PostControllers() {
 		} else {
 			let id = req.body.id;
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let pembaca = decoded._id;
+
+			if (id == null || pembaca == null) {
+				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+			} else {
+				Post
+					.findById(id)
+					.then(function(post) {
+						if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							post.suka
+								.create({
+									pembaca: pembaca
+								})
+								.then(function(post) {
+									res.status(200).json({status: true, message: 'Baca artikel berhasil.'});
+								})
+								.catch(function(err) {
+									res.status(500).json({status: false, message: 'Baca artikel gagal.', err: err});
+								}) 
+						}
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+					});
+			}		
+		}
+	}
+
+	this.suka = function(req, res) {
+		var auth = {
+			role: 'admin'
+		};
+		var role = 'admin'
+
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (role !== auth.role) {
+			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
+		} else {
+			let id = req.body.id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penyuka = decoded._id;
 
 			if (id == null || penyuka == null) {
@@ -437,4 +448,4 @@ function PostControllers() {
 	}
 }
 
-module.exports = new PostControllers();
+module.exports = new TanyaControllers();

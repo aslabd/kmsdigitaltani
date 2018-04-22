@@ -1,9 +1,13 @@
+// package yang dibutuhkan
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+// definisi skema
 module.exports = new Schema({
 	meta: {
-		jumlah_suka: { type: Number, default: 0 }
+		jumlah:{
+            suka: { type: Number, default: 0 }
+        }
 	},
     penulis: Schema.Types.ObjectId,
     tanggal: {

@@ -1,24 +1,34 @@
+// koneksi database yang dibutuhkan
 var connection = require('./../../connection');
+
+// package yang dibutuhkan
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var JawabSchema = require('./jawab');
+// skema lain yang dibutuhkan
+var KomentarSchema = require('./../tanggapan/komentar');
+var SubkategoriSchema = require('./../kategorisasi/subkategori');
 
-var Jawab = connection.model('Jawab', JawabSchema);
+// koneksikan skema dengan database
+var Komentar = connection.model('Komentar', KomentarSchema);
+var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 module.exports = new Schema({
     meta: {
         thumbnail: { type: String, default: null },
-        jumlah_bagi: { type: Number, default: 0 },
-        jumlah_baca: { type: Number, default: 0 },
-        jumlah_suka: { type: Number, default: 0 },
-        jumlah_komentar: { type: Number, default: 0 },
+        jumlah: {
+            bagi: { type: Number, default: 0 },
+            baca: { type: Number, default: 0 },
+            suka: { type: Number, default: 0 },
+            komentar: { type: Number, default: 0 }
+        }
     },
     penulis: Schema.Types.ObjectId,					
     tanggal: {
         terbit: { type: Date, default: Date.now }, 
         ubah: { type: Date, default: Date.now } 
     },
+    subtopik: { type: Schema.Types.ObjectId, ref: 'Subtopik' },
     judul: String,
     ringkasan: { type: String, default: null },
     isi: String,
@@ -37,5 +47,5 @@ module.exports = new Schema({
     	penyuka: Schema.Types.ObjectId,
         tanggal: { type: Date, default: Date.now } 
     }],
-    jawab: [{ type: Schema.Types.ObjectId, ref: 'Jawab' }]
+    komentar: [{ type: Schema.Types.ObjectId, ref: 'Komentar' }]
 });

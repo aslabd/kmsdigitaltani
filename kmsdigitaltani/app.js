@@ -9,11 +9,15 @@ var cors = require('cors');
 
 // Route di aplikasi
 var index = require('./routes/index');
-var user = require('./routes/user/user');
 var post = require('./routes/artikel/post');
-var komentar = require('./routes/artikel/komentar');
-var gambar = require('./routes/artikel/gambar');
-var file = require('./routes/materi/file');
+var tanya = require('./routes/diskusi/tanya');
+var kategori = require('./routes/kategorisasi/kategori');
+var subkategori = require('./routes/kategorisasi/subkategori');
+var file = require('./routes/lampiran/file');
+var topik = require('./routes/materi/topik');
+var komentar = require('./routes/tanggapan/komentar');
+var balasan = require('./routes/tanggapan/balasan');
+var user = require('./routes/user/user');
 
 var app = express();
 
@@ -32,16 +36,24 @@ app.use(cors());
 
 // Seluruh link menuju route
 app.use('/api/', index);
-app.use('/api/user', user);
-app.use('/api/user/*', user);
 app.use('/api/artikel/post', post);
 app.use('/api/artikel/post/*', post);
-app.use('/api/artikel/komentar', komentar);
-app.use('/api/artikel/komentar/*', komentar);
-app.use('/api/artikel/gambar', gambar);
-app.use('/api/artikel/gambar/*', gambar);
-app.use('/api/materi/file', file);
-app.use('/api/materi/file/*', file);
+app.use('/api/diskusi/topik', topik);
+app.use('/api/diskusi/topik/*', topik);
+app.use('/api/kategorisasi/kategori', kategori);
+app.use('/api/kategorisasi/kategori/*', kategori);
+app.use('/api/kategorisasi/subkategori', subkategori);
+app.use('/api/kategorisasi/subkategori/*', subkategori);
+app.use('/api/lampiran/file', file);
+app.use('/api/lampiran/file/*', file);
+app.use('/api/materi/topik', topik);
+app.use('/api/materi/topik/*', topik);
+app.use('/api/tanggapan/komentar', komentar);
+app.use('/api/tanggapan/komentar/*', komentar);
+app.use('/api/tanggapan/balasan', balasan);
+app.use('/api/tanggapan/balasan/*', balasan);
+app.use('/api/user', user);
+app.use('/api/user/*', user);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

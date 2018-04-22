@@ -3,7 +3,7 @@ var jwt =require('jsonwebtoken');
 var connection = require('./../../connection');
 
 var PostSchema = require('./../../models/artikel/post');
-var KomentarSchema = require('./../../models/artikel/komentar');
+var KomentarSchema = require('./../../models/tanggapan/komentar');
 
 var Post = connection.model('Post', PostSchema);
 var Komentar = connection.model('Komentar', KomentarSchema);
@@ -38,15 +38,16 @@ function KomentarControllers() {
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Post
+			Komentar
 				.findById(id)
-				.exec(function(err, post) {
+				.populate('balasan')
+				.exec(function(err, komentar) {
 					if (err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
 					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Ambil artikel berhasil.', data: post});
+						res.status(200).json({status: true, message: 'Ambil komentar berhasil.', data: komentar});
 					}
 				});
 		}
@@ -131,23 +132,21 @@ function KomentarControllers() {
 	}
 
 	this.delete = function(req, res) {
-		var auth = {
+		let auth = {
 			role: 'admin'
 		};
-		var role = 'admin';
+		let role = 'admin';
 
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var id = req.body.id;
+			let id = req.body.id;
 
 			if (id == null) {
 				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 			} else {
-				var id = req.body.id;
-
 				Komentar
 					.findById(id)
 					.select('penulis')
@@ -174,82 +173,48 @@ function KomentarControllers() {
 		}	
 	}
 
-	this.baca = function(req, res) {
-		var id = req.body.id;
-
-		if (id == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else {
-			Post
-				.findById(id)
-				.then(function(post) {
-					if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						if (auth.id !== null) {
-							post
-								.baca.create({
-									pembaca: auth.id
-								})
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Baca artikel berhasil.'});
-								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Baca artikel gagal.', err: err});
-								});
-						} else {
-							post
-								.baca.create({
-									pembaca: null
-								})
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Baca artikel berhasil.'});
-								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Baca artikel gagal.', err: err});
-								});
-						}
-					}
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err})
-				});
-		}
-	}
-
 	this.suka = function(req, res) {
 		var auth = {
 			role: 'admin'
 		};
 		var role = 'admin'
-		var id = req.body.id;
 
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			Post
-				.findById(id)
-				.then(function(post) {
-					if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						post
-							.suka.create({
-								penyuka: auth.id
-							})
-							.then(function(post) {
-								res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
-							})
-							.catch(function(err) {
-								res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
-							}) 
-					}
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
-				});
+			let id = req.body.id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let penyuka = decoded._id;
+
+			if (id == null || penyuka == null) {
+				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+			} else {
+				Komentar
+					.findById(id)
+					.then(function(komentar) {
+						if (komentar == null || komentar == 0) {
+							res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
+						} else {
+							komentar
+								.suka.create({
+									penyuka: penyuka
+								})
+								.then(function(komentar) {
+									res.status(200).json({status: true, message: 'Suka komentar berhasil.'});
+								})
+								.catch(function(err) {
+									res.status(500).json({status: false, message: 'Suka komentar gagal.', err: err});
+								}) 
+						}
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
+					});
+			}
+
+			
 		}
 	}
 }

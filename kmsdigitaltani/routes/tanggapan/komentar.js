@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var komentar = require('./../../controllers/artikel/komentar');
+var komentar = require('./../../controllers/tanggapan/komentar');
 
 router.get('/:id_post', function(req, res) {
 	komentar.getAll(req, res);

@@ -7,7 +7,7 @@ var path = require('path');
 var connection = require('./../../connection');
 
 // skema yang dibutuhkan
-var FileSchema = require('./../../models/materi/file');
+var FileSchema = require('./../../models/lampiran/file');
 
 // aktifkan skema ke database
 var File = connection.model('File', FileSchema);
@@ -20,8 +20,11 @@ function FileControllers() {
 		let limit = Number(option.limit);
 
 		let sort = JSON.parse(req.params.sort);
-		let terbaru = sort.terbaru;
-		let terpopuler = sort.terpopuler;
+		if (sort.terpopuler == 1) {
+			attribute = 'tanggal.terbit'
+		} else {
+			attribute = 'meta.jumlah_baca'
+		}
 
 		File
 			.find()
@@ -35,8 +38,7 @@ function FileControllers() {
 				extension: 1
 			})
 			.sort({
-				'tanggal.terbit': terbaru,
-				'meta.jumlah_baca': terpopuler
+				atrribute: 1
 			})
 			.exec(function(err, file) {
 				if (err) {
@@ -46,7 +48,7 @@ function FileControllers() {
 				} else {
 					res.status(200).json({status: true, message: 'Ambil beberapa materi berhasil.', data: file});
 				}
-			})
+			});
 	}
 
 	this.getByPemilik = function(req, res) {
@@ -88,8 +90,7 @@ function FileControllers() {
 						status: 1
 					})
 					.sort({
-						'tanggal.terbit': terbaru,
-						'meta.jumlah_baca': terpopuler
+						'tanggal.terbit': terbaru
 					})
 					.exec(function(err, file) {
 						if (err) {
@@ -117,8 +118,7 @@ function FileControllers() {
 						status: 1
 					})
 					.sort({
-						'tanggal.terbit': terbaru,
-						'meta.jumlah_baca': terpopuler
+						'tanggal.terbit': terbaru
 					})
 					.exec(function(err, file) {
 						if (err) {

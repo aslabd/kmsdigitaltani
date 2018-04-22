@@ -1,11 +1,9 @@
 var mongoose = require('mongoose');
-var connection = require('./../../connection');
 var Schema = mongoose.Schema;
 
-var User = new Schema({
-    nama: String,
+module.exports = new Schema({
+    username: String,
+    name: String,
     email: String,
     role: { type: Number, default: 0 }
 });
-
-module.exports = connection.model('User', User);

@@ -1,22 +1,22 @@
 var express = require('express');
 var router = express.Router();
 
-var gambar = require('./../../controllers/artikel/gambar');
+var topik = require('./../../controllers/materi/topik');
 
 router.get('/:filename', function(req, res) {
-	gambar.getGambar(req, res);
+	topik.gettopik(req, res);
 });
 
 router.get('/all/:option/:sort', function(req, res) {
-	gambar.getAll(req, res);
+	topik.getAll(req, res);
 });
 
 router.get('/saya/:option/:sort', function(req, res) {
-	gambar.getByPemilik(req, res);
+	topik.getByPemilik(req, res);
 });
 
 router.post('/upload', function(req, res) {
-	gambar.upload(req, res);
+	topik.upload(req, res);
 });
 
 

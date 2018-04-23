@@ -1,27 +1,42 @@
+// package yang dibutuhkan
 var jwt = require('jsonwebtoken');
 
+// koneksi database yang dibutuhkan
 var connection = require('./../../connection');
+var connectionPH = require('./../../connectionPH');;
 
+// skema yang dibutuhkan
 var TanyaSchema = require('./../../models/diskusi/tanya');
+var UserSchema = require('./../../models/user/user');
 
+// koneksikan skema dengan database
 var Tanya = connection.model('Tanya', TanyaSchema);
+var User = connectionPH.model('User', UserSchema);
 
 function TanyaControllers() {
+	// Ambil semua artikel
 	this.getAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = option.subkategori;
 
 		let sort = JSON.parse(req.params.sort);
-		let terbaru = sort.terbaru;
-		let terpopuler = sort.terpopuler;
-
-		if (skip == null || limit == null || terbaru == null || terpopuler == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		let sort_attribute;
+		if (sort.terpopuler == null || sort.terpopuler == 0) {
+			sort_attribute = 'tanggal.terbit'
 		} else {
+			sort_attribute = 'meta.jumlah.baca'
+		}
+
+		if (skip == null || limit == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (subkategori == null || subkategori == 0) {
 			Tanya
 				.find()
 				.where('status').equals('terbit')
+				.populate('penulis', 'username name email role', User)
+				.populate('subkategori')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -29,20 +44,52 @@ function TanyaControllers() {
 					meta: 1,
 					penulis: 1,
 					tanggal: 1,
+					subkategori: 1,
 					judul: 1,
 					ringkasan: 1,
 					tag: 1
 				})
 				.sort({
-					'tanggal.terbit': terbaru
+					sort_attribute: 1
 				})
-				.exec(function(err, post) {
+				.exec(function(err, tanya) {
 					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+					} else if (tanya == null || tanya == 0) {
+						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
+						res.status(200).json({status: true, message: 'Pertanyaan berhasil ditemukan', data: tanya});
+					}
+				});
+		} else {
+			Tanya
+				.find()
+				.where('status').equals('terbit')
+				.where('subkategori').equals(subkategori)
+				.populate('penulis', 'username name email role', User)
+				.populate('subkategori')
+				.skip(skip)
+				.limit(limit)
+				.select({
+					_id: 1,
+					meta: 1,
+					penulis: 1,
+					tanggal: 1,
+					subkategori: 1,
+					judul: 1,
+					ringkasan: 1,
+					tag: 1
+				})
+				.sort({
+					sort_attribute: 1
+				})
+				.exec(function(err, tanya) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+					} else if (tanya == null || tanya == 0) {
+						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Pertanyaan berhasil ditemukan', data: tanya});
 					}
 				});
 		}
@@ -54,17 +101,18 @@ function TanyaControllers() {
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Post
+			Tanya
 				.findById(id)
 				.select({
 					_id: 1,
 					meta: 1,
 					penulis: 1,
 					tanggal: 1,
+					subkategori: 1,
 					judul: 1,
-					isi: 1,
 					status: 1,
-					tag: 1,
+					ringkasan: 1,
+					tag: 1
 				})
 				.exec(function(err, post) {
 					if (err) {

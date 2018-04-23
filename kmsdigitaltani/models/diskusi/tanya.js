@@ -28,7 +28,7 @@ module.exports = new Schema({
         terbit: { type: Date, default: Date.now }, 
         ubah: { type: Date, default: Date.now } 
     },
-    subtopik: { type: Schema.Types.ObjectId, ref: 'Subtopik' },
+    subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
     judul: String,
     ringkasan: { type: String, default: null },
     isi: String,

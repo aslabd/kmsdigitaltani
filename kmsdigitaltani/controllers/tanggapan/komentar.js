@@ -91,28 +91,24 @@ function KomentarControllers() {
 								})
 								.then(function(komentar) {
 									// Komentar yang sudah dibuat, ditaruh di post sesuai dengan id_post
-									Post
-										.findById(id_post)
-										.then(function(post) {
-											post.komentar
-												.push(komentar._id)
+									post.komentar
+										.push(komentar._id)
 											
-											post
-												.save(function(err) {
-													// Jika gagal menyimpan komentar ke post, maka hapus komentar yang sudah dibuat
-													if (err) {
-														Komentar
-															.findByIdAndRemove(komentar._id)
-															.then(function(komentar) {
-																res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Komentar berhasil dihapus.', err: err});
-															})
-															.catch(function(err) {
-																res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Hapus komentar gagal.', err: err});
-															})
-													} else {
-														res.status(200).json({status: true, message: 'Membuat komentar baru berhasil.'});
-													}
-												})
+									post
+										.save(function(err) {
+											// Jika gagal menyimpan komentar ke post, maka hapus komentar yang sudah dibuat
+											if (err) {
+												Komentar
+													.findByIdAndRemove(komentar._id)
+													.then(function(komentar) {
+														res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Menghapus komentar berhasil.', err: err});
+													})
+													.catch(function(err) {
+														res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Menghapus komentar gagal.', err: err});
+													})
+											} else {
+												res.status(200).json({status: true, message: 'Membuat komentar baru berhasil.'});
+											}
 										})
 										.catch(function(err) {
 											res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});

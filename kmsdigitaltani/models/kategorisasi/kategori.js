@@ -15,9 +15,11 @@ var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 module.exports = new Schema({
 	meta: {
 		thumbnail: String,
-		jumlah_subkategori: { type: Number, default: 0 }
+		jumlah: {
+			subkategori: { type: Number, default: 0 }
+		}
 	},
     nama: String,
-    deskripsi: String,
+    deskripsi: { type: String, default: null },
     subkategori: [{ type: Schema.Types.ObjectId, ref: 'Subkategori' }]
 });

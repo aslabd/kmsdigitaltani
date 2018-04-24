@@ -1,3 +1,11 @@
+/*
+Back End Modul KMS Digital Tani
+Kode sumber ini dikembangkan oleh:
+1.	Muhammad Aslam Abdurrohim (aslamabdurrohim@gmail.com)
+2.
+3.
+*/
+
 // Package yang dibutuhkan
 var express = require('express');
 var path = require('path');
@@ -19,6 +27,7 @@ var komentar = require('./routes/tanggapan/komentar');
 var balasan = require('./routes/tanggapan/balasan');
 var user = require('./routes/user/user');
 
+// Panggil express
 var app = express();
 
 // view engine setup
@@ -73,6 +82,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-console.log("Selamat datang");
+console.log("Server KMS berjalan.");
 
 module.exports = app;

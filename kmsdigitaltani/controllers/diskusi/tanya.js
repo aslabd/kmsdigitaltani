@@ -149,11 +149,15 @@ function TanyaControllers() {
 			let status = option.status;
 
 			let sort = JSON.parse(req.params.sort);
-			let terbaru = sort.terbaru;
-			let terpopuler = sort.terpopuler;
+			let sort_attribute;
+			if (sort.terpopuler == null || sort.terpopuler == 0) {
+				sort_attribute = 'tanggal.terbit';
+			} else {
+				sort_attribute = 'meta.jumlah.baca';
+			}
 
 			if (status == null) {
-				Post
+				Tanya
 					.find()
 					.where('penulis').equals(penulis)
 					.skip(skip)
@@ -163,14 +167,14 @@ function TanyaControllers() {
 						meta: 1,
 						penulis: 1,
 						tanggal: 1,
+						subkategori: 1,
 						judul: 1,
-						ringkasan: 1,
 						status: 1,
+						ringkasan: 1,
 						tag: 1
 					})
 					.sort({
-						'tanggal.ubah': terbaru,
-						'meta.jumlah_baca': terpopuler
+						sort_attribute: 1
 					})
 					.exec(function(err, post) {
 						if (err) {
@@ -182,7 +186,7 @@ function TanyaControllers() {
 						}
 					});
 			} else {
-				Post
+				Tanya
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').equals(status)
@@ -193,14 +197,14 @@ function TanyaControllers() {
 						meta: 1,
 						penulis: 1,
 						tanggal: 1,
+						subkategori: 1,
 						judul: 1,
-						ringkasan: 1,
 						status: 1,
+						ringkasan: 1,
 						tag: 1
 					})
 					.sort({
-						'tanggal.ubah': terbaru,
-						'meta.jumlah_baca': terpopuler
+						sort_attribute: 1
 					})
 					.exec(function(err, post) {
 						if (err) {
@@ -235,9 +239,10 @@ function TanyaControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			Post
+			Tanya
 				.find()
 				.where('status').equals('terbit')
+				.where('suka.penyuka').equals(penyuka)
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -248,7 +253,7 @@ function TanyaControllers() {
 					judul: 1,
 					ringkasan: 1,
 					tag: 1
-				})
+				}) 
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
@@ -272,25 +277,24 @@ function TanyaControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var meta = req.body.meta;
-			var tanggal = req.body.tanggal;
-			var judul = req.body.judul;
-			var ringkasan = req.body.ringkasan;
-			var isi = req.body.isi;
-			var tag = req.body.tag;
-			var status = req.body.status;
+			let meta = req.body.meta;
+			let judul = req.body.judul;
+			let ringkasan = req.body.ringkasan;
+			let isi = req.body.isi;
+			let tag = req.body.tag;
+			let status = req.body.status;
+			let subkategori = req.body.subkategori;
 
-			var decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			var penulis = decoded._id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let penulis = decoded._id;
 
-			if (penulis == null || judul == null || isi == null || status == null) {
+			if (penulis == null || judul == null || isi == null || status == null || subkategori == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
-				Post
+				Tanya
 					.create({
 						meta: meta,
 						penulis: penulis,
-						tanggal: tanggal,
 						judul: judul,
 						ringkasan: ringkasan,
 						isi: isi,
@@ -368,17 +372,17 @@ function TanyaControllers() {
 	}
 
 	this.delete = function(req, res) {
-		var auth = {
+		let auth = {
 			role: 'admin'
 		};
-		var role = 'admin';
+		let role = 'admin';
 
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var id = req.body.id;
+			let id = req.body.id;
 
 			if (id == null) {
 				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});

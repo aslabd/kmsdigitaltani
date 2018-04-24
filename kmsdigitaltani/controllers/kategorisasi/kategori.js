@@ -18,6 +18,7 @@ function KategoriControllers() {
 			.find()
 			.skip(skip)
 			.limit(limit)
+			.populate('subkategori', 'nama')
 			.select({
 				meta: 1,
 				nama: 1,
@@ -63,7 +64,7 @@ function KategoriControllers() {
 		let nama = req.body.nama;
 		let deskripsi = req.body.deskripsi;
 
-		if (nama == null || nama == 0) {
+		if (nama == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 		} else {
 			Kategori
@@ -77,6 +78,71 @@ function KategoriControllers() {
 				})
 				.catch(function(err) {
 					res.status(500).json({status: false, message: 'Tambah kategori gagal.', err: err});
+				})
+		}
+	}
+
+	// Ubah kategori
+	this.update = function(req, res) {
+		let id = req.body.id;
+		let meta = req.body.meta;
+		let nama = req.body.nama;
+		let deskripsi = req.body.deskripsi;
+
+		if (id == null || nama == null) {
+			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
+		} else {
+			Kategori
+				.findById(id)
+				.then(function(kategori) {
+					if (kategori == null || kategori == 0) {
+						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
+					} else {
+						Kategori
+							.findByIdAndUpdate(id, {
+								meta: meta,
+								nama: nama,
+								deskripsi: deskripsi
+							})
+							.then(function(kategori) {
+								res.status(200).json({status: true, message: 'Kategori berhasil diubah.'});
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Kategori gagal diubah.', err: err});
+							})
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Kategori gagal ditemukan.', err: err});
+				})
+		}
+	}
+
+	// Hapus kategori
+	this.delete = function(req, res) {
+		let id = req.body.id;
+
+		if (id == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Kategori
+				.findById(id)
+				.then(function(kategori) {
+					if (kategori == null || kategori == 0) {
+						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
+					} else {
+						Kategori
+							.findByIdAndRemove(id)
+							.then(function(kategori) {
+								res.status(200).json({status: true, message: 'Kategori berhasil dihapus.'});
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Kategori gagal dihapus.', err: err})
+							})
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Kategori gagal ditemukan.', err: err});
 				})
 		}
 	}

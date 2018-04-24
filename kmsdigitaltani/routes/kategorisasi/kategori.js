@@ -12,12 +12,12 @@ router.get('/all/:option/:sort', function(req, res) {
 	kategori.getAll(req, res);
 });
 
-router.get('/saya/:option/:sort', function(req, res) {
-	kategori.getByPenulis(req, res);
-});
-
 router.post('/tulis', function(req, res) {
 	kategori.add(req, res);
+});
+
+router.post('/ubah', function(req, res) {
+	kategori.update(req, res);
 });
 
 router.delete('/hapus', function(req, res) {

@@ -256,16 +256,15 @@ function PostControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var meta = req.body.meta;
-			var tanggal = req.body.tanggal;
-			var judul = req.body.judul;
-			var ringkasan = req.body.ringkasan;
-			var isi = req.body.isi;
-			var tag = req.body.tag;
-			var status = req.body.status;
+			let meta = req.body.meta;
+			let judul = req.body.judul;
+			let ringkasan = req.body.ringkasan;
+			let isi = req.body.isi;
+			let tag = req.body.tag;
+			let status = req.body.status;
 
-			var decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			var penulis = decoded._id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let penulis = decoded._id;
 
 			if (penulis == null || judul == null || isi == null || status == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
@@ -274,7 +273,6 @@ function PostControllers() {
 					.create({
 						meta: meta,
 						penulis: penulis,
-						tanggal: tanggal,
 						judul: judul,
 						ringkasan: ringkasan,
 						isi: isi,
@@ -295,7 +293,6 @@ function PostControllers() {
 		let auth = {
 			role: 'admin'
 		};
-
 		let role = 'admin';
 
 		if (auth == false) {
@@ -305,7 +302,6 @@ function PostControllers() {
 		} else {
 			var id = req.body.id;
 			var meta = req.body.meta;
-			var tanggal = req.body.tanggal;
 			var judul = req.body.judul;
 			var ringkasan = req.body.ringkasan;
 			var isi = req.body.isi;
@@ -329,12 +325,12 @@ function PostControllers() {
 							Post
 								.findByIdAndUpdate(id, {
 									meta: meta,
-									tanggal: tanggal,
 									judul: judul,
 									ringkasan: ringkasan,
 									isi: isi,
 									tag: tag,
-									status: status
+									status: status,
+									'tanggal.ubah': Date.now()
 								})
 								.then(function(post) {
 									res.status(200).json({status: true, message: 'Ubah artikel berhasil.'});
@@ -352,10 +348,10 @@ function PostControllers() {
 	}
 
 	this.delete = function(req, res) {
-		var auth = {
+		let auth = {
 			role: 'admin'
 		};
-		var role = 'admin';
+		let role = 'admin';
 
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
@@ -394,10 +390,10 @@ function PostControllers() {
 	}
 
 	this.suka = function(req, res) {
-		var auth = {
+		let auth = {
 			role: 'admin'
 		};
-		var role = 'admin'
+		let role = 'admin'
 
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});

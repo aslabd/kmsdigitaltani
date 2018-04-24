@@ -15,8 +15,7 @@ var User = connectionPH.model('User', UserSchema);
 module.exports = new Schema({
     pemilik: { type: Schema.Types.ObjectId, ref: 'User' },                 
     tanggal: { 
-        terbit: { type: Date, default: Date.now },
-        ubah: { type: Date, default: Date.now } 
+        upload: { type: Date, default: Date.now }
     },
     jenis: { type: String, enum: ['gambar', 'materi']},
     nama: {

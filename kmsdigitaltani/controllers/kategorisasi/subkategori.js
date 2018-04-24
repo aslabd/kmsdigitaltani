@@ -13,7 +13,7 @@ function SubkategoriControllers() {
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 
-		Kategori
+		Subkategori
 			.find()
 			.skip(skip)
 			.limit(limit)
@@ -26,7 +26,7 @@ function SubkategoriControllers() {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil semua subkategori gagal.', err: err});
 				} else if (kategori == null || kategori == 0) {
-					res.status(204).json({status: false, message: 'Subategori tidak ditemukan.'});
+					res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
 				} else {
 					res.status(200).json({status: true, message: 'Ambil semua subkategori berhasil.', data: subkategori});
 				}
@@ -42,14 +42,15 @@ function SubkategoriControllers() {
 		} else {
 			Subkategori
 				.findById(id)
-				.exec(function(err, subkategori) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Ambil suatu subkategori gagal.', err: err});
-					} else if (kategori == null || kategori == 0) {
+				.then(function(subkategori) {
+					if (kategori == null || kategori == 0) {
 						res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
 					} else {
 						res.status(200).json({status: true, message: 'Ambil suatu subkategori berhasil.', data: kategori});
 					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Ambil suatu subkategori gagal.', err: err});
 				})
 		}
 	}

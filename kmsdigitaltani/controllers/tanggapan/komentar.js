@@ -11,14 +11,26 @@ var Komentar = connection.model('Komentar', KomentarSchema);
 function KomentarControllers() {
 	// Ambil semua komentar (sebagian atribut) di dalam suatu post
 	this.getAll = function(req, res) {
-		var id_post = req.params.id_post;
+		let id_post = req.params.id_post;
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
 
 		if (id_post == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Post
 				.findById(id_post)
-				.populate('komentar', 'meta tanggal penulis isi')
+				.populate({
+					path: 'komentar',
+					match: {
+						status: {
+							$eq: 'terbit'
+						}
+					},
+					skip: skip,
+					limit: limit
+				})
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
@@ -66,7 +78,6 @@ function KomentarControllers() {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
 			let id_post = req.body.id_post;
-			let tanggal = req.body.tanggal;
 			let isi = req.body.isi;
 			let status = req.body.status;
 
@@ -85,7 +96,6 @@ function KomentarControllers() {
 							Komentar
 								.create({
 									penulis: penulis,
-									tanggal: tanggal,
 									isi: isi,
 									status: status
 								})
@@ -95,7 +105,7 @@ function KomentarControllers() {
 										.push(komentar._id)
 											
 									post
-										.save(function(err) {
+										.save(function(err, post) {
 											// Jika gagal menyimpan komentar ke post, maka hapus komentar yang sudah dibuat
 											if (err) {
 												Komentar
@@ -109,9 +119,6 @@ function KomentarControllers() {
 											} else {
 												res.status(200).json({status: true, message: 'Membuat komentar baru berhasil.'});
 											}
-										})
-										.catch(function(err) {
-											res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
 										})
 								})
 								.catch(function(err) {
@@ -155,7 +162,34 @@ function KomentarControllers() {
 							Komentar
 								.findByIdAndRemove(id)
 								.then(function(komentar) {
-									res.status(200).json({status: true, message: 'Hapus komentar berhasil.'});
+									Post
+										.find()
+										.where('komentar._id').equals(id)
+										.exec(function(err, post) {
+											if (post == null || post == 0) {
+												res.status
+											}
+										})
+									post.komentar
+										.remove(id)
+
+									post
+										.save(function(err, post) {
+											// Jika gagal menyimpan komentar ke post, maka hapus komentar yang sudah dibuat
+											if (err) {
+												Komentar
+													.create(komentar)
+													.then(function(komentar) {
+														res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Membuat kembali komentar berhasil.', err: err});
+													})
+													.catch(function(err) {
+														res.status(500).json({status: false, message: 'Menyimpan komentar gagal. Membuat kembali komentar gagal.', err: err});
+													})
+											} else {
+												res.status(200).json({status: true, message: 'Komentar berhasil dihapus.', data: komentar});
+											}
+										})
+									//res.status(200).json({status: true, message: 'Hapus komentar berhasil.'});
 								})
 								.catch(function(err) {
 									res.status(500).json({status: false, message: 'Hapus komentar gagal.', err: err});

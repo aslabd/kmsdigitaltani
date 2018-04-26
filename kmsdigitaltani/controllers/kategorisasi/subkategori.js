@@ -2,8 +2,10 @@ var jwt = require('jsonwebtoken');
 
 var connection = require('./../../connection');
 
+var KategoriSchema = require('./../../models/kategorisasi/kategori');
 var SubkategoriSchema = require('./../../models/kategorisasi/subkategori');
 
+var Kategori = connection.model('Kategori', KategoriSchema);
 var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 function SubkategoriControllers() {
@@ -12,6 +14,7 @@ function SubkategoriControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = Number(option.subkategori);
 
 		Subkategori
 			.find()
@@ -20,20 +23,23 @@ function SubkategoriControllers() {
 			.select({
 				meta: 1,
 				nama: 1,
-				deskripsi: 1
+				deskripsi: 1,
+			})
+			.sort({
+				nama: 1
 			})
 			.exec(function(err, subkategori) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil semua subkategori gagal.', err: err});
-				} else if (kategori == null || kategori == 0) {
-					res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
+				} else if (subkategori == null || subkategori == 0) {
+					res.status(204).json({status: false, message: 'Subategori tidak ditemukan.'});
 				} else {
 					res.status(200).json({status: true, message: 'Ambil semua subkategori berhasil.', data: subkategori});
 				}
 			})
 	}
 
-	// Ambil suatu subkategori
+	// Ambil suatu kategori
 	this.get = function(req, res) {
 		let id = req.params.id;
 
@@ -42,15 +48,14 @@ function SubkategoriControllers() {
 		} else {
 			Subkategori
 				.findById(id)
-				.then(function(subkategori) {
-					if (kategori == null || kategori == 0) {
-						res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
+				.exec(function(err, subkategori) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil suatu subkategori gagal.', err: err});
+					} else if (subkategori == null || subkategori == 0) {
+						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Ambil suatu subkategori berhasil.', data: kategori});
+						res.status(200).json({status: true, message: 'Ambil suatu kategori berhasil.', data: subkategori});
 					}
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Ambil suatu subkategori gagal.', err: err});
 				})
 		}
 	}

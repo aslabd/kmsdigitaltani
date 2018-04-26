@@ -25,6 +25,9 @@ function KategoriControllers() {
 				deskripsi: 1,
 				subkategori: subkategori
 			})
+			.sort({
+				nama: 1
+			})
 			.exec(function(err, kategori) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil semua kategori gagal.', err: err});

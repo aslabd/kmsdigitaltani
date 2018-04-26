@@ -22,8 +22,8 @@ module.exports = new Schema({
     jenis: { type: String, enum: ['artikel', 'diskusi', 'materi'] },
     penulis: Schema.Types.ObjectId,
     tanggal: {
-        terbit : { type: Date, default: Date.now },
-        ubah: { type: Date, default: Date.now }
+        terbit : { type: Date, default: Date.now() },
+        ubah: { type: Date, default: Date.now() }
     },
     isi: String,
     status: { type: String, enum: ['terbit', 'draft'], default: 'terbit' },

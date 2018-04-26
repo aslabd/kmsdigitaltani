@@ -9,7 +9,7 @@ var connection = require('./../../connection');
 // skema yang dibutuhkan
 var FileSchema = require('./../../models/lampiran/file');
 
-// aktifkan skema ke database 
+// aktifkan skema ke database
 var File = connection.model('File', FileSchema);
 
 
@@ -195,7 +195,7 @@ function FileControllers() {
 							direktori: direktori
 						})
 						.then(function(file) {
-							res.status(200).json({status: true, message: 'Unggah file berhasil.'});
+							res.status(200).json({status: true, message: 'Unggah file berhasil.', data: file});
 						})
 						.catch(function(err) {
 							res.status(500).json({status: false, message: 'Unggah file gagal.'})

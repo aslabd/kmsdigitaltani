@@ -3,7 +3,7 @@ var router = express.Router();
 
 var komentar = require('./../../controllers/tanggapan/komentar');
 
-router.get('/:id_post', function(req, res) {
+router.get('/:id_post/:option', function(req, res) {
 	komentar.getAll(req, res);
 });
 

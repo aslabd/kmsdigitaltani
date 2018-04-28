@@ -14,7 +14,7 @@ var Tanya = connection.model('Tanya', TanyaSchema);
 var User = connectionPH.model('User', UserSchema);
 
 function TanyaControllers() {
-	// Ambil semua artikel
+	// Ambil semua pertanyaan
 	this.getAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -103,6 +103,8 @@ function TanyaControllers() {
 		} else {
 			Tanya
 				.findById(id)
+				.populate('subkategori')
+				.populate('penulis', 'username name email role', User)
 				.select({
 					_id: 1,
 					meta: 1,
@@ -114,19 +116,19 @@ function TanyaControllers() {
 					ringkasan: 1,
 					tag: 1
 				})
-				.exec(function(err, post) {
+				.exec(function(err, tanya) {
 					if (err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						res.status(500).json({status: false, message: 'Ambil pertanyaan gagal.', err: err});
+					} else if (tanya == null || tanya == 0) {
+						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Ambil artikel berhasil.', data: post});
+						res.status(200).json({status: true, message: 'Ambil pertanyaan berhasil.', data: tanya});
 					}
 				})
 		}
 	}
 
-	this.getByPenulis = function(req, res) {
+	this.getAllByPenulis = function(req, res) {
 		let auth = {
 			role: 'admin'
 		}
@@ -160,6 +162,8 @@ function TanyaControllers() {
 				Tanya
 					.find()
 					.where('penulis').equals(penulis)
+					.populate('subkategori')
+					.populate('penulis', 'username name email role', User)
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -176,13 +180,13 @@ function TanyaControllers() {
 					.sort({
 						sort_attribute: 1
 					})
-					.exec(function(err, post) {
+					.exec(function(err, tanya) {
 						if (err) {
-							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-						} else if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 						} else {
-							res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
+							res.status(200).json({status: true, message: 'Pertanyaan berhasil ditemukan', data: tanya});
 						}
 					});
 			} else {
@@ -190,6 +194,8 @@ function TanyaControllers() {
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').equals(status)
+					.populate('subkategori')
+					.populate('penulis', 'username name email role', User)
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -206,13 +212,13 @@ function TanyaControllers() {
 					.sort({
 						sort_attribute: 1
 					})
-					.exec(function(err, post) {
+					.exec(function(err, tanya) {
 						if (err) {
-							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-						} else if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 						} else {
-							res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
+							res.status(200).json({status: true, message: 'Pertanyaan berhasil ditemukan', data: tanya});
 						}
 					});
 			}
@@ -254,13 +260,13 @@ function TanyaControllers() {
 					ringkasan: 1,
 					tag: 1
 				}) 
-				.exec(function(err, post) {
+				.exec(function(err, tanya) {
 					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+					} else if (tanya == null || tanya == 0) {
+						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
+						res.status(200).json({status: true, message: 'Pertanyaan berhasil ditemukan', data: tanya});
 					}
 				});
 		}
@@ -299,13 +305,14 @@ function TanyaControllers() {
 						ringkasan: ringkasan,
 						isi: isi,
 						tag: tag,
-						status: status
+						status: status,
+						subkategori: subkategori
 					})
-					.then(function(post) {
-						res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
+					.then(function(tanya) {
+						res.status(200).json({status: true, message: 'Membuat pertanyaan baru berhasil.', data: tanya});
 					})
 					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Membuat artikel baru gagal.', err: err});
+						res.status(500).json({status: false, message: 'Membuat pertanyaan baru gagal.', err: err});
 					});
 			}
 		}
@@ -331,6 +338,7 @@ function TanyaControllers() {
 			var isi = req.body.isi;
 			var tag = req.body.tag;
 			var status = req.body.status;
+			var subkategori = req.body.subkategori;
 
 			var decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			var penulis = decoded._id;
@@ -338,15 +346,15 @@ function TanyaControllers() {
 			if (judul == null || isi == null || status == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
-				Post
+				Tanya
 					.findById(id)
-					.then(function(post) {
-						if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-						} else if (role !== auth.role && post.penulis !== penulis) {
+					.then(function(tanya) {
+						if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else if (role !== auth.role && tanya.penulis !== penulis) {
 							res.status(401).json({status: false, message: 'Otorisasi salah.'});
 						} else {
-							Post
+							Tanya
 								.findByIdAndUpdate(id, {
 									meta: meta,
 									tanggal: tanggal,
@@ -354,18 +362,19 @@ function TanyaControllers() {
 									ringkasan: ringkasan,
 									isi: isi,
 									tag: tag,
-									status: status
+									status: status,
+									subkategori: subkategori
 								})
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Ubah artikel berhasil.'});
+								.then(function(tanya) {
+									res.status(200).json({status: true, message: 'Ubah pertanyaan berhasil.'});
 								})
 								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Ubah artikel gagal.', err: err});
+									res.status(500).json({status: false, message: 'Ubah pertanyaan gagal.', err: err});
 								});
 						}
 					})
 					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+						res.status(500).json({status: false, message: 'Ambil pertanyaan gagal.', err: err});
 					});
 			}
 		}
@@ -387,27 +396,27 @@ function TanyaControllers() {
 			if (id == null) {
 				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 			} else {
-				Post
+				Tanya
 					.findById(id)
 					.select('penulis')
-					.then(function(post) {
-						if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-						} else if (auth.role !== 'admin' && post.penulis !== auth.id) {
+					.then(function(tanya) {
+						if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else if (auth.role !== 'admin' && tanya.penulis !== auth.id) {
 							res.status(401).json({status: false, message: 'Otorisasi salah.'})
 						} else {
-							Post
+							Tanya
 								.findByIdAndRemove(id)
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Hapus artikel berhasil.'});
+								.then(function(tanya) {
+									res.status(200).json({status: true, message: 'Hapus pertanyaan berhasil.'});
 								})
 								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Hapus artikel gagal.', err: err});
+									res.status(500).json({status: false, message: 'Hapus pertanyaan gagal.', err: err});
 								});
 						}
 					})
 					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+						res.status(500).json({status: false, message: 'Ambil pertanyaan gagal.', err: err});
 					});
 			}
 		}	
@@ -431,72 +440,33 @@ function TanyaControllers() {
 			if (id == null || pembaca == null) {
 				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 			} else {
-				Post
+				Tanya
 					.findById(id)
-					.then(function(post) {
-						if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					.then(function(tanya) {
+						if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 						} else {
-							post.suka
+							tanya.suka
 								.create({
 									pembaca: pembaca
 								})
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Baca artikel berhasil.'});
+								.then(function(tanya) {
+									res.status(200).json({status: true, message: 'Baca pertanyaan berhasil.'});
 								})
 								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Baca artikel gagal.', err: err});
+									res.status(500).json({status: false, message: 'Baca pertanyaan gagal.', err: err});
 								}) 
 						}
 					})
 					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+						res.status(500).json({status: false, message: 'Ambil pertanyaan gagal.', err: err});
 					});
 			}		
 		}
 	}
 
 	this.suka = function(req, res) {
-		var auth = {
-			role: 'admin'
-		};
-		var role = 'admin'
-
-		if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (role !== auth.role) {
-			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
-		} else {
-			let id = req.body.id;
-			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			let penyuka = decoded._id;
-
-			if (id == null || penyuka == null) {
-				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-			} else {
-				Post
-					.findById(id)
-					.then(function(post) {
-						if (post == null || post == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-						} else {
-							post.suka
-								.create({
-									penyuka: penyuka
-								})
-								.then(function(post) {
-									res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
-								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
-								}) 
-						}
-					})
-					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
-					});
-			}
-		}
+		
 	}
 }
 

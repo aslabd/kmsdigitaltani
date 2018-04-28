@@ -132,6 +132,9 @@ function FileControllers() {
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let pemilik = decoded._id;
 
+			// untuk ukuran file
+			let max_size;
+
 			// definisikan mimetypes yang diizinkan
 			let gambar_mimetypes = ['image/png', 'image/jpg', 'image/jpeg'];
 			let materi_mimetypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'];
@@ -174,15 +177,20 @@ function FileControllers() {
 					}
 				},
 				limits: {
-					fileSize: 2 * 1024 * 1024
+					// mendefinisikan file size yang bisa diupload
+					fileSize: 5 * 1024 * 1024
 				}
 			}).single('file');
 
 			upload(req, res, function(err) {
-				if (req.file == null || req.file == 0) {
-					res.status(400).json({status: false, message: 'Gambar kosong.'});
-				} else if (err) {
-					res.status(500).json({status: false, message: 'Unggah gambar gagal.', err: err});
+				if (err) {
+					if (err.code == 'LIMIT_FILE_SIZE') {
+						res.status(400).json({status: false, message: 'File berukuran melebihi yang diizinkan.', err: err});
+					} else {
+						res.status(500).json({status: false, message: 'File gagal diunggah.', err: err});
+					}
+				} else if (req.file == null || req.file == 0) {
+					res.status(400).json({status: false, message: 'File kosong.'});
 				} else {
 					File
 						.create({

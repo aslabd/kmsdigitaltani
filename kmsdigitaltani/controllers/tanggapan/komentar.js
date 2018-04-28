@@ -243,8 +243,6 @@ function KomentarControllers() {
 						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
 					});
 			}
-
-			
 		}
 	}
 }

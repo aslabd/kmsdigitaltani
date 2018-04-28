@@ -1,4 +1,4 @@
-var connection = ('./../connection')
+var connection = ('./../configuration/connectionPengguna')
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -18,8 +18,12 @@ module.exports = new Schema({
 		daftar: { type: Date, default: Date.now },
 		ubah: { type: Date, default: Date.now },
 		login: { type: Date, default: null }
-	}
+	},
+	status: Boolean,
 	role: { type: Number, default: 0 },
 	foto: String,
-	alamat: String
+	alamat: {
+		lokasi: String
+		kelurahan: { type: Schema.Types.ObjectId, ref: 'Kelurahan' },
+	}
 });

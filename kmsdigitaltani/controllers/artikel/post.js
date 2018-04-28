@@ -389,7 +389,7 @@ function PostControllers() {
 		}	
 	}
 
-	this.suka = function(req, res) {
+	this.addSuka = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -417,17 +417,17 @@ function PostControllers() {
 								.create({
 									penyuka: penyuka
 								})
-								.then(function(post) {
+								.exec(function(post) {
 									res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
 								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
-								}) 
+								// .catch(function(err) {
+								// 	res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
+								// }) 
 						}
 					})
-					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
-					});
+					// .catch(function(err) {
+					// 	res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+					// });
 			}
 		}
 	}

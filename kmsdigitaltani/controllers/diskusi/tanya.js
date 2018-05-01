@@ -233,7 +233,6 @@ function TanyaControllers() {
 		let role = 'admin';
 
 		let option = JSON.parse(req.params.option);
-		console.log(option)
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 
@@ -259,6 +258,9 @@ function TanyaControllers() {
 					judul: 1,
 					ringkasan: 1,
 					tag: 1
+				})
+				.sort({
+					'suka.tanggal': 1
 				}) 
 				.exec(function(err, tanya) {
 					if (err) {

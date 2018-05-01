@@ -3,7 +3,7 @@ var jwt = require('jsonwebtoken');
 
 // koneksi database yang dibutuhkan
 var connection = require('./../../connection');
-var connectionPH = require('./../../connectionPH');;
+var connectionPH = require('./../../connectionPH');
 
 // skema yang dibutuhkan
 var PostSchema = require('./../../models/artikel/post');
@@ -37,16 +37,14 @@ function PostControllers() {
 				.find()
 				.where('status').equals('terbit')
 				.populate('penulis', 'username name email role', User)
+				.populate('subkategori')
 				.skip(skip)
 				.limit(limit)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					judul: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0, 
+					suka: 0,
+					komentar: 0
 				})
 				.sort({
 					sort_attribute: 1
@@ -72,16 +70,13 @@ function PostControllers() {
 			Post
 				.findById(id)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					judul: 1,
-					isi: 1,
-					status: 1,
-					tag: 1
+					bagi: -1,
+					baca: -1,
+					suka: -1
 				})
 				.populate('penulis', 'username name email role', User)
+				.populate('komentar')
+				.populate('subkategori')
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
@@ -128,19 +123,17 @@ function PostControllers() {
 				Post
 					.find()
 					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
 					.skip(skip)
 					.limit(limit)
 					.select({
-						_id: 1,
-						meta: 1,
-						penulis: 1,
-						tanggal: 1,
-						judul: 1,
-						ringkasan: 1,
-						status: 1,
-						tag: 1
+						bagi: 0,
+						baca: 0,
+						suka: 0,
+						komentar: 0
 					})
 					.populate('penulis', 'username name email role', User)
+					.populate('subkategori')
 					.sort({
 						sort_attribute: 1
 					})
@@ -161,16 +154,13 @@ function PostControllers() {
 					.skip(skip)
 					.limit(limit)
 					.select({
-						_id: 1,
-						meta: 1,
-						penulis: 1,
-						tanggal: 1,
-						judul: 1,
-						ringkasan: 1,
-						status: 1,
-						tag: 1
+						bagi: 0,
+						baca: 0,
+						suka: 0,
+						komentar: 0
 					})
 					.populate('penulis', 'username name email role', User)
+					.populate('subkategori')
 					.sort({
 						sort_attribute: 1
 					})
@@ -216,7 +206,7 @@ function PostControllers() {
 		} else {
 			Post
 				.find()
-				.where('status').equals('terbit')
+				.where('status').in('terbit')
 				.where('suka.penyuka').equals(penyuka)
 				.skip(skip)
 				.limit(limit)
@@ -230,6 +220,7 @@ function PostControllers() {
 					tag: 1
 				})
 				.populate('penulis', 'username name email role', User)
+				.populate('subkategori')
 				.sort({
 					sort_attribute: 1
 				})
@@ -262,6 +253,7 @@ function PostControllers() {
 			let isi = req.body.isi;
 			let tag = req.body.tag;
 			let status = req.body.status;
+			let subkategori = req.body.subkategori;
 
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penulis = decoded._id;
@@ -277,7 +269,8 @@ function PostControllers() {
 						ringkasan: ringkasan,
 						isi: isi,
 						tag: tag,
-						status: status
+						status: status,
+						subkategori: subkategori
 					})
 					.then(function(post) {
 						res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
@@ -300,16 +293,17 @@ function PostControllers() {
 		} else if (role !== auth.role) {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
-			var id = req.body.id;
-			var meta = req.body.meta;
-			var judul = req.body.judul;
-			var ringkasan = req.body.ringkasan;
-			var isi = req.body.isi;
-			var tag = req.body.tag;
-			var status = req.body.status;
+			let id = req.body.id;
+			let meta = req.body.meta;
+			let judul = req.body.judul;
+			let ringkasan = req.body.ringkasan;
+			let isi = req.body.isi;
+			let tag = req.body.tag;
+			let status = req.body.status;
+			let subkategori = req.body.subkategori;
 
-			var decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			var penulis = decoded._id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let penulis = decoded._id;
 
 			if (judul == null || isi == null || status == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
@@ -330,6 +324,7 @@ function PostControllers() {
 									isi: isi,
 									tag: tag,
 									status: status,
+									subkategori: subkategori,
 									'tanggal.ubah': Date.now()
 								})
 								.then(function(post) {
@@ -373,7 +368,9 @@ function PostControllers() {
 							res.status(401).json({status: false, message: 'Otorisasi salah.'})
 						} else {
 							Post
-								.findByIdAndRemove(id)
+								.findByIdAndUpdate(id, {
+									status: 'hapus'
+								})
 								.then(function(post) {
 									res.status(200).json({status: true, message: 'Hapus artikel berhasil.'});
 								})
@@ -414,20 +411,20 @@ function PostControllers() {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 						} else {
 							post.suka
-								.create({
+								.push({
 									penyuka: penyuka
 								})
-								.exec(function(post) {
-									res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
+
+							post
+								.save(function(err, post) {
+									if (err) {
+										res.status(500).json({status: false, message: 'Suka artikel gagal.'});
+									} else {
+										res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
+									}
 								})
-								// .catch(function(err) {
-								// 	res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
-								// }) 
 						}
 					})
-					// .catch(function(err) {
-					// 	res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
-					// });
 			}
 		}
 	}

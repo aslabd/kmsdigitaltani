@@ -13,6 +13,9 @@ var User = connectionPH.model('User', UserSchema);
 
 // definisi skema
 module.exports = new Schema({
+    meta: {
+        thumbnail: { type: String, default: null }
+    },
     pemilik: { type: Schema.Types.ObjectId, ref: 'User' },
     tanggal: { 
         upload: { type: Date, default: Date.now }

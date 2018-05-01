@@ -1,13 +1,13 @@
 var connection = require('./../../connection');
-//var connectionPH = require('./../../connectionPH');;
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var KomentarSchema = require('./../tanggapan/komentar');
-//var UserSchema = require('./../user/user');
+var SubkategoriSchema = require('./../kategorisasi/subkategori');
 
 var Komentar = connection.model('Komentar', KomentarSchema);
-//var User = connectionPH.model('User', UserSchema);
+var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 module.exports = new Schema({
     meta: {
@@ -27,8 +27,9 @@ module.exports = new Schema({
     judul: String,
     ringkasan: { type: String, default: null },
     isi: String,
+    subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
     tag: [{ type: String, default: null }],
-    status: { type: String, enum: ['terbit', 'draft'], default: 'draft' },
+    status: { type: String, enum: ['terbit', 'draft', 'hapus'], default: 'draft' },
     bagi: [{
         pembagi: { type: Schema.Types.ObjectId, default: null },
         tanggal: { type: Date, default: Date.now },

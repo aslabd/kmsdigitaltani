@@ -11,12 +11,13 @@ var Komentar = connection.model('Komentar', KomentarSchema);
 function KomentarControllers() {
 	// Ambil semua komentar (sebagian atribut) di dalam suatu post
 	this.getAll = function(req, res) {
-		let id_post = req.params.id_post;
+		let id = req.params.id;
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let jenis = option.jenis;
 
-		if (id_post == null) {
+		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Post
@@ -129,7 +130,6 @@ function KomentarControllers() {
 					.catch(function(err) {
 						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
 					})
-				
 			}
 		}
 	}
@@ -167,7 +167,7 @@ function KomentarControllers() {
 										.where('komentar._id').equals(id)
 										.exec(function(err, post) {
 											if (post == null || post == 0) {
-												res.status
+												res.status(204).json({status: false, message: 'Artikel tidak ditemukan'})
 											}
 										})
 									post.komentar
@@ -189,7 +189,6 @@ function KomentarControllers() {
 												res.status(200).json({status: true, message: 'Komentar berhasil dihapus.', data: komentar});
 											}
 										})
-									//res.status(200).json({status: true, message: 'Hapus komentar berhasil.'});
 								})
 								.catch(function(err) {
 									res.status(500).json({status: false, message: 'Hapus komentar gagal.', err: err});

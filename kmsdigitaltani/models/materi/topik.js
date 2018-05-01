@@ -7,9 +7,13 @@ var Schema = mongoose.Schema;
 
 // skema lain yang dibutuhkan
 var KomentarSchema = require('./../tanggapan/komentar');
+var FileSchema = require('./../lampiran/file');
+var SubkategoriSchema = require('./../kategorisasi/subkategori');
 
 // koneksikan skema dengan database
 var Komentar = connection.model('Komentar', KomentarSchema);
+var File = connection.model('File', FileSchema);
+var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 // definisi skema
 module.exports = new Schema({
@@ -28,6 +32,8 @@ module.exports = new Schema({
     },
     judul: String,
     deskripsi: String,
+    subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
+    tag: [{ type: String, default: null }],
     status: { type: String, enum: ['terbit', 'draft'], default: 'draft' },
     materi: [{ type: Schema.Types.ObjectId, ref: 'File'}],
     bagi: [{

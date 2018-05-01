@@ -12,11 +12,19 @@ router.get('/all/:option/:sort', function(req, res) {
 });
 
 router.get('/saya/:option/:sort', function(req, res) {
-	topik.getByPemilik(req, res);
+	topik.getAllByPenulis(req, res);
 });
 
-router.post('/upload', function(req, res) {
-	topik.upload(req, res);
+router.post('/tulis', function(req, res) {
+	topik.add(req, res);
+});
+
+router.delete('/hapus', function(req, res) {
+	topik.delete(req, res);
+});
+
+router.patch('/ubah', function(req, res) {
+	topik.update(req, res);
 });
 
 

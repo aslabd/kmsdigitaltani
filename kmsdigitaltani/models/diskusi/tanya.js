@@ -15,7 +15,6 @@ var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 module.exports = new Schema({
     meta: {
-        thumbnail: { type: String, default: null },
         jumlah: {
             bagi: { type: Number, default: 0 },
             baca: { type: Number, default: 0 },
@@ -30,7 +29,6 @@ module.exports = new Schema({
     },
     subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
     judul: String,
-    ringkasan: { type: String, default: null },
     isi: String,
     tag: [{ type: String, default: null }],
     status: { type: String, enum: ['terbit', 'draft'], default: 'draft' },

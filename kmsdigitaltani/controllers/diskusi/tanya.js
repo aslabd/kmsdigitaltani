@@ -40,14 +40,10 @@ function TanyaControllers() {
 				.skip(skip)
 				.limit(limit)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					subkategori: 1,
-					judul: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0,
+					suka: 0,
+					komentar: 0
 				})
 				.sort({
 					sort_attribute: 1
@@ -71,14 +67,10 @@ function TanyaControllers() {
 				.skip(skip)
 				.limit(limit)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					subkategori: 1,
-					judul: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0,
+					suka: 0,
+					komentar: 0
 				})
 				.sort({
 					sort_attribute: 1
@@ -106,15 +98,10 @@ function TanyaControllers() {
 				.populate('subkategori')
 				.populate('penulis', 'username name email role', User)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					subkategori: 1,
-					judul: 1,
-					status: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0,
+					suka: 0,
+					komentar: 0
 				})
 				.exec(function(err, tanya) {
 					if (err) {
@@ -167,15 +154,10 @@ function TanyaControllers() {
 					.skip(skip)
 					.limit(limit)
 					.select({
-						_id: 1,
-						meta: 1,
-						penulis: 1,
-						tanggal: 1,
-						subkategori: 1,
-						judul: 1,
-						status: 1,
-						ringkasan: 1,
-						tag: 1
+						bagi: 0,
+						baca: 0,
+						suka: 0,
+						komentar: 0
 					})
 					.sort({
 						sort_attribute: 1
@@ -199,15 +181,10 @@ function TanyaControllers() {
 					.skip(skip)
 					.limit(limit)
 					.select({
-						_id: 1,
-						meta: 1,
-						penulis: 1,
-						tanggal: 1,
-						subkategori: 1,
-						judul: 1,
-						status: 1,
-						ringkasan: 1,
-						tag: 1
+						bagi: 0,
+						baca: 0,
+						suka: 0,
+						komentar: 0
 					})
 					.sort({
 						sort_attribute: 1
@@ -251,13 +228,10 @@ function TanyaControllers() {
 				.skip(skip)
 				.limit(limit)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					judul: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0,
+					suka: 0,
+					komentar: 0
 				})
 				.sort({
 					'suka.tanggal': 1

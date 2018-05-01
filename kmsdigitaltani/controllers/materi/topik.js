@@ -22,7 +22,6 @@ function TopikControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
-		let subkategori = option.subkategori;
 
 		let sort = JSON.parse(req.params.sort);
 		let sort_attribute;
@@ -35,7 +34,6 @@ function TopikControllers() {
 		Topik
 			.find()
 			.where('status').equals('terbit')
-			.where('subkategori').equals(subkategori)
 			.populate('subkategori')
 			.populate('penulis', 'username name email role', User)
 			.select({

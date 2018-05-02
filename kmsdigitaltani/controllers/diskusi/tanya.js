@@ -330,7 +330,6 @@ function TanyaControllers() {
 						} else {
 							Tanya
 								.findByIdAndUpdate(id, {
-									meta: meta,
 									judul: judul,
 									isi: isi,
 									tag: tag,

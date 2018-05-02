@@ -37,11 +37,11 @@ function TopikControllers() {
 			.populate('subkategori')
 			.populate('penulis', 'username name email role', User)
 			.select({
-				komentar: -1,
-				baca: -1,
-				suka: -1,
-				bagi: -1,
-				materi: -1
+				bagi: 0,
+				baca: 0,
+				suka: 0,
+				materi: 0,
+				komentar: 0
 			})
 			.sort({
 				sort_attribute: 1
@@ -93,11 +93,11 @@ function TopikControllers() {
 					.populate('subkategori')
 					.populate('penulis', 'username name email role', User)
 					.select({
-						komentar: 0,
+						bagi: 0,
 						baca: 0,
 						suka: 0,
-						bagi: 0,
-						materi: 0
+						materi: 0,
+						komentar: 0
 					})
 					.sort({
 						sort_attribute: 1
@@ -121,11 +121,11 @@ function TopikControllers() {
 					.populate('subkategori')
 					.populate('penulis', 'username name email role', User)
 					.select({
-						komentar: 0,
+						bagi: 0,
 						baca: 0,
 						suka: 0,
-						bagi: 0,
-						materi: 0
+						materi: 0,
+						komentar: 0
 					})
 					.sort({
 						sort_attribute: 1

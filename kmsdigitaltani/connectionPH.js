@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-mongoose.createConnection('mongodb://PortalHarga:portal1234@abdurrohim.id:27017/PortalHarga', {
+mongoose.connect('mongodb://PortalHarga:portal1234@abdurrohim.id:27017/PortalHarga', {
     socketTimeoutMS: 0,
     keepAlive: true,
     reconnectTries: 30

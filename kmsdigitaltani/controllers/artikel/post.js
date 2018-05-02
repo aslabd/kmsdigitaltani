@@ -56,6 +56,7 @@ function PostControllers() {
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
+						//connection.close()
 						res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
 					}
 				});
@@ -73,10 +74,10 @@ function PostControllers() {
 				.select({
 					bagi: 0,
 					baca: 0,
-					suka: 0
+					suka: 0,
+					komentar: 0
 				})
 				.populate('penulis', 'username name email role', User)
-				.populate('komentar')
 				.populate('subkategori')
 				.exec(function(err, post) {
 					if (err) {
@@ -208,17 +209,16 @@ function PostControllers() {
 			Post
 				.find()
 				.where('status').in('terbit')
-				.where('suka.penyuka').equals(penyuka)
+				.where('suka').all([{
+					penyuka: penyuka
+				}])
 				.skip(skip)
 				.limit(limit)
 				.select({
-					_id: 1,
-					meta: 1,
-					penulis: 1,
-					tanggal: 1,
-					judul: 1,
-					ringkasan: 1,
-					tag: 1
+					bagi: 0,
+					baca: 0,
+					suka: 0,
+					komentar: 0
 				})
 				.populate('penulis', 'username name email role', User)
 				.populate('subkategori')

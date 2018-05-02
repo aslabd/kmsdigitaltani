@@ -9,6 +9,7 @@ var SubkategoriSchema = require('./../kategorisasi/subkategori');
 var Komentar = connection.model('Komentar', KomentarSchema);
 var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
+
 module.exports = new Schema({
     meta: {
         thumbnail: { type: String, default: null },

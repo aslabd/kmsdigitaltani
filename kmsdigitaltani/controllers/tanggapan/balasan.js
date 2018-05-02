@@ -18,6 +18,9 @@ function BalasanControllers() {
 		} else {
 			Komentar
 				.findById(id_komentar)
+				.select({
+					balasan: 1
+				})
 				.populate('balasan')
 				.exec(function(err, komentar) {
 					if (err) {
@@ -75,7 +78,7 @@ function BalasanControllers() {
 											
 											komentar
 												.save(function(err) {
-													// Jika gagal menyimpan komentar ke komentar, maka hapus balasan yang sudah dibuat
+													// Jika gagal menyimpan balasan ke komentar, maka hapus balasan yang sudah dibuat
 													if (err) {
 														Balasan
 															.findByIdAndRemove(balasan._id)

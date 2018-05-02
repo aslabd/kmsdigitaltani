@@ -3,6 +3,10 @@ var router = express.Router();
 
 var topik = require('./../../controllers/materi/topik');
 
+router.get('/:id', function(req, res) {
+	topik.get(req, res);
+});
+
 router.get('/all/:option/:sort', function(req, res) {
 	topik.getAll(req, res);
 });

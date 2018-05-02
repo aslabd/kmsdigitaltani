@@ -13,6 +13,7 @@ var UserSchema = require('./../../models/user/user');
 var Post = connection.model('Post', PostSchema);
 var User = connectionPH.model('User', UserSchema);
 
+
 // fungsi controllers Post
 function PostControllers() {
 	// Ambil semua artikel

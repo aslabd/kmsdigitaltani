@@ -34,7 +34,7 @@ module.exports = new Schema({
     deskripsi: String,
     subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
     tag: [{ type: String, default: null }],
-    status: { type: String, enum: ['terbit', 'draft'], default: 'draft' },
+    status: { type: String, enum: ['terbit', 'draft', 'hapus'], default: 'draft' },
     materi: [{ type: Schema.Types.ObjectId, ref: 'File'}],
     bagi: [{
         pembagi: { type: Schema.Types.ObjectId, default: null },

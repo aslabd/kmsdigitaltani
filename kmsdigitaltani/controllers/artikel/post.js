@@ -70,9 +70,9 @@ function PostControllers() {
 			Post
 				.findById(id)
 				.select({
-					bagi: -1,
-					baca: -1,
-					suka: -1
+					bagi: 0,
+					baca: 0,
+					suka: 0
 				})
 				.populate('penulis', 'username name email role', User)
 				.populate('komentar')
@@ -386,7 +386,7 @@ function PostControllers() {
 		}	
 	}
 
-	this.addSuka = function(req, res) {
+	this.suka = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -406,6 +406,7 @@ function PostControllers() {
 			} else {
 				Post
 					.findById(id)
+					.where('suka.penyuka')
 					.then(function(post) {
 						if (post == null || post == 0) {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});

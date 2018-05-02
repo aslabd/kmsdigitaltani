@@ -16,24 +16,32 @@ var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 module.exports = new Schema({
     meta: {
         jumlah: {
-            bagi: { type: Number, default: 0 },
-            baca: { type: Number, default: 0 },
-            suka: { type: Number, default: 0 },
-            komentar: { type: Number, default: 0 }
+            bagi: { type: Number, default: 0, min: 0 },
+            baca: { type: Number, default: 0, min: 0 },
+            suka: { type: Number, default: 0, min: 0 },
+            komentar: { type: Number, default: 0, min: 0 }
         }
     },
-    penulis: Schema.Types.ObjectId,					
+    penulis: { type: Schema.Types.ObjectId, required: true },					
     tanggal: {
         terbit: { type: Date, default: Date.now }, 
         ubah: { type: Date, default: Date.now } 
     },
-    subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
-    judul: String,
-    isi: String,
+    subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori', default: null },
+    judul: { type: String, required: true },
+    isi: { type: String, required: true },
     tag: [{ type: String, default: null }],
-    status: { type: String, enum: ['terbit', 'draft'], default: 'draft' },
+    status: { type: String, enum: ['terbit', 'draft', 'hapus'], default: 'draft' },
+    upvote: [{
+        voter: { type: Schema.Types.ObjectId },
+        tanggal: { type: Date, default: Date.now }
+    }],
+    downvote: [{
+        voter: { type: Schema.Types.ObjectId },
+        tanggal: { type: Date, default: Date.now }
+    }],
     bagi: [{
-        pembagi: { type: Schema.Types.ObjectId, default: null },
+        pembagi: { type: Schema.Types.ObjectId },
         tanggal: { type: Date, default: Date.now },
         via: { type: String, enum: ['facebook', 'twitter', 'whatsapp', 'line', 'url'] } 
     }],

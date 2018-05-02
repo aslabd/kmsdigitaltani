@@ -139,8 +139,7 @@ function UserControllers() {
       			.where('username').equals(username)
       			.where('password').equals(password)
       			.select({
-      				password: -1,
-      				__v: -1
+      				password: -1
       			})
       			.exec(function(err, user) {
       				if (err) {

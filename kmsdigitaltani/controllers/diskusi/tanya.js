@@ -149,6 +149,7 @@ function TanyaControllers() {
 				Tanya
 					.find()
 					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
 					.populate('subkategori')
 					.populate('penulis', 'username name email role', User)
 					.skip(skip)
@@ -307,10 +308,7 @@ function TanyaControllers() {
 			res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 		} else {
 			var id = req.body.id;
-			var meta = req.body.meta;
-			var tanggal = req.body.tanggal;
 			var judul = req.body.judul;
-			var ringkasan = req.body.ringkasan;
 			var isi = req.body.isi;
 			var tag = req.body.tag;
 			var status = req.body.status;
@@ -333,13 +331,12 @@ function TanyaControllers() {
 							Tanya
 								.findByIdAndUpdate(id, {
 									meta: meta,
-									tanggal: tanggal,
 									judul: judul,
-									ringkasan: ringkasan,
 									isi: isi,
 									tag: tag,
 									status: status,
-									subkategori: subkategori
+									subkategori: subkategori,
+									'tanggal.ubah': Date.now()
 								})
 								.then(function(tanya) {
 									res.status(200).json({status: true, message: 'Ubah pertanyaan berhasil.'});
@@ -382,7 +379,9 @@ function TanyaControllers() {
 							res.status(401).json({status: false, message: 'Otorisasi salah.'})
 						} else {
 							Tanya
-								.findByIdAndRemove(id)
+								.findByIdAndUpdate(id, {
+									status: 'hapus'
+								})
 								.then(function(tanya) {
 									res.status(200).json({status: true, message: 'Hapus pertanyaan berhasil.'});
 								})

@@ -11,6 +11,10 @@ router.post('/tulis', function(req, res) {
 	balasan.add(req, res);
 });
 
+router.patch('/ubah', function(req, res) {
+	balasan.update(req, res);
+});
+
 router.delete('/hapus', function(req, res) {
 	balasan.delete(req, res);
 });

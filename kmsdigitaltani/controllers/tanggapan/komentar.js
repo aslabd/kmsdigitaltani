@@ -4,10 +4,12 @@ var connection = require('./../../connection');
 
 var PostSchema = require('./../../models/artikel/post');
 var TanyaSchema = require('./../../models/diskusi/tanya');
-var TopikSchema = require('./../../models/artikel/post');
+var TopikSchema = require('./../../models/materi/topik');
 var KomentarSchema = require('./../../models/tanggapan/komentar');
 
 var Post = connection.model('Post', PostSchema);
+var Tanya = connection.model('Tanya', TanyaSchema);
+var Topik = connection.model('Topik', TopikSchema);
 var Komentar = connection.model('Komentar', KomentarSchema);
 
 function KomentarControllers() {

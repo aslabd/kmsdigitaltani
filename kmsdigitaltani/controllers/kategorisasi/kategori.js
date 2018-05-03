@@ -12,7 +12,6 @@ function KategoriControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
-		let subkategori = Number(option.subkategori);
 
 		Kategori
 			.find()
@@ -22,8 +21,7 @@ function KategoriControllers() {
 			.select({
 				meta: 1,
 				nama: 1,
-				deskripsi: 1,
-				subkategori: subkategori
+				deskripsi: 1
 			})
 			.sort({
 				nama: 1

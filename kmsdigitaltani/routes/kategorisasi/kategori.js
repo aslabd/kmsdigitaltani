@@ -16,7 +16,7 @@ router.post('/tulis', function(req, res) {
 	kategori.add(req, res);
 });
 
-router.post('/ubah', function(req, res) {
+router.patch('/ubah', function(req, res) {
 	kategori.update(req, res);
 });
 

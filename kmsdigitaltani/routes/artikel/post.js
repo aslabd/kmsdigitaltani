@@ -33,7 +33,7 @@ router.patch('/ubah', function(req, res) {
 });
 
 router.put('/suka', function(req, res) {
-	post.addSuka(req, res);
+	post.suka(req, res);
 });
 
 router.put('/baca', function(req, res) {

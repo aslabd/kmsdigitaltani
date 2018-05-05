@@ -3,7 +3,7 @@ var router = express.Router();
 
 var balasan = require('./../../controllers/tanggapan/balasan');
 
-router.get('/:id_komentar', function(req, res) {
+router.get('/:id_komentar/:option', function(req, res) {
 	balasan.getAll(req, res);
 });
 

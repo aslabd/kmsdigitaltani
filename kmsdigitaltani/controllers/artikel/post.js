@@ -56,7 +56,6 @@ function PostControllers() {
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
-						//connection.close()
 						res.status(200).json({status: true, message: 'Artikel berhasil ditemukan', data: post});
 					}
 				});
@@ -209,9 +208,7 @@ function PostControllers() {
 			Post
 				.find()
 				.where('status').in('terbit')
-				.where('suka').all([{
-					penyuka: penyuka
-				}])
+				.where('suka.penyuka').all([penyuka])
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -407,25 +404,48 @@ function PostControllers() {
 			} else {
 				Post
 					.findById(id)
-					.where('suka.penyuka')
 					.then(function(post) {
 						if (post == null || post == 0) {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 						} else {
-							post.suka
-								.push({
-									penyuka: penyuka
-								})
-
-							post
-								.save(function(err, post) {
+							Post
+								.findById(id)
+								.where('suka.penyuka').all([penyuka])
+								.exec(function(err, disukai) {
 									if (err) {
-										res.status(500).json({status: false, message: 'Suka artikel gagal.'});
+										res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
+									} else if (disukai == null || disukai == 0) {
+										post.suka
+											.push({
+												penyuka: penyuka
+											})
+
+										post
+											.save(function(err, post) {
+												if (err) {
+													res.status(500).json({status: false, message: 'Suka artikel gagal.', err: err});
+												} else {
+													res.status(200).json({status: true, message: 'Suka artikel berhasil.', data: post});
+												}
+											})
 									} else {
-										res.status(200).json({status: true, message: 'Suka artikel berhasil.'});
+										post.suka
+											.pull(post.suka[0]._id)
+
+										post
+											.save(function(err, post) {
+												if (err) {
+													res.status(500).json({status: false, message: 'Batal suka artikel gagal.', err: err});
+												} else {
+													res.status(200).json({status: true, message: 'Batal suka artikel berhasil.', data: post});
+												}
+											})
 									}
 								})
 						}
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
 					})
 			}
 		}

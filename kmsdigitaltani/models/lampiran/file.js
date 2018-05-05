@@ -25,6 +25,7 @@ module.exports = new Schema({
         asli: String,
         sistem: String
     },
+    status: { type: Boolean, default: true },
     ukuran: Number,
     deskripsi: String,
     mimetype: String,

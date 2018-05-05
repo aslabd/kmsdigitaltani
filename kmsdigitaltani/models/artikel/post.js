@@ -14,10 +14,10 @@ module.exports = new Schema({
     meta: {
         thumbnail: { type: String, default: null },
         jumlah: {
-            bagi: { type: Number, default: 0 },
-            baca: { type: Number, default: 0 },
-            suka: { type: Number, default: 0 },
-            komentar: { type: Number, default: 0 }
+            bagi: { type: Number, default: 0, min: 0 },
+            baca: { type: Number, default: 0, min: 0 },
+            suka: { type: Number, default: 0, min: 0 },
+            komentar: { type: Number, default: 0, min: 0 }
         }
     },
     penulis: Schema.Types.ObjectId,					

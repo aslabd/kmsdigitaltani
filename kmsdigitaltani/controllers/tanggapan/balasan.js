@@ -11,7 +11,10 @@ var Balasan = connection.model('Balasan', BalasanSchema);
 function BalasanControllers() {
 	// Ambil semua balasan (sebagian atribut) di dalam suatu komentar
 	this.getAll = function(req, res) {
-		var id_komentar = req.params.id_komentar;
+		let id_komentar = req.params.id_komentar;
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
 
 		if (id_komentar == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
@@ -21,7 +24,16 @@ function BalasanControllers() {
 				.select({
 					balasan: 1
 				})
-				.populate('balasan')
+				.populate({
+					path: 'balasan',
+					match: {
+						status: {
+							$eq: 'terbit'
+						}
+					},
+					skip: skip,
+					limit: limit
+				})
 				.exec(function(err, komentar) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
@@ -48,25 +60,23 @@ function BalasanControllers() {
 		} else {
 			let id_komentar = req.body.id_komentar;
 			let isi = req.body.isi;
-			let status = req.body.status;
 
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penulis = decoded._id;
 
-			if (id_komentar == null || penulis ==  null || isi == null || status == null) {
+			if (id_komentar == null || penulis ==  null || isi == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
 				Komentar
 					.findById(id_komentar)
 					.then(function(komentar) {
-						if (komentar == null || post == 0) {
+						if (komentar == null || komentar == 0) {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 						} else {
 							Balasan
 								.create({
 									penulis: penulis,
-									isi: isi,
-									status: status
+									isi: isi
 								})
 								.then(function(balasan) {
 									// Balasan yang sudah dibuat, ditaruh di komentar yang sesuai dengan id_komentar

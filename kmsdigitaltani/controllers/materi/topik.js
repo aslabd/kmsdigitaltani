@@ -90,6 +90,7 @@ function TopikControllers() {
 					.skip(skip)
 					.limit(limit)
 					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
 					.populate('subkategori')
 					.populate('penulis', 'username name email role', User)
 					.select({

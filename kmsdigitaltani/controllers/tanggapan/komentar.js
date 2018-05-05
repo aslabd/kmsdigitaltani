@@ -170,12 +170,11 @@ function KomentarControllers() {
 		} else {
 			let id_post = req.body.id_post;
 			let isi = req.body.isi;
-			let status = req.body.status;
 
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penulis = decoded._id;
 
-			if (id_post == null || penulis ==  null || isi == null || status == null) {
+			if (id_post == null || penulis ==  null || isi == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
 				Post
@@ -187,8 +186,7 @@ function KomentarControllers() {
 							Komentar
 								.create({
 									penulis: penulis,
-									isi: isi,
-									status: status
+									isi: isi
 								})
 								.then(function(komentar) {
 									// Komentar yang sudah dibuat, ditaruh di post sesuai dengan id_post
@@ -238,12 +236,11 @@ function KomentarControllers() {
 		} else {
 			let id_tanya = req.body.id_tanya;
 			let isi = req.body.isi;
-			let status = req.body.status;
 
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penulis = decoded._id;
 
-			if (id_tanya == null || penulis ==  null || isi == null || status == null) {
+			if (id_tanya == null || penulis ==  null || isi == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
 				Tanya
@@ -255,8 +252,7 @@ function KomentarControllers() {
 							Komentar
 								.create({
 									penulis: penulis,
-									isi: isi,
-									status: status
+									isi: isi
 								})
 								.then(function(komentar) {
 									// Komentar yang sudah dibuat, ditaruh di pertanyaan sesuai dengan id_tanya
@@ -306,12 +302,11 @@ function KomentarControllers() {
 		} else {
 			let id_topik = req.body.id_topik;
 			let isi = req.body.isi;
-			let status = req.body.status;
 
 			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 			let penulis = decoded._id;
 
-			if (id_topik == null || penulis ==  null || isi == null || status == null) {
+			if (id_topik == null || penulis ==  null || isi == null) {
 				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
 			} else {
 				Topik
@@ -323,8 +318,7 @@ function KomentarControllers() {
 							Komentar
 								.create({
 									penulis: penulis,
-									isi: isi,
-									status: status
+									isi: isi
 								})
 								.then(function(komentar) {
 									// Komentar yang sudah dibuat, ditaruh di pmateri sesuai dengan id_topik

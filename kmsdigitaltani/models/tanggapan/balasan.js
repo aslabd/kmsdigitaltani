@@ -15,6 +15,7 @@ module.exports = new Schema({
         ubah: { type: Date, default: Date.now }
     },
     isi: String,
+    status: { type: String, enum: ['terbit', 'hapus'], default: 'terbit' },
     suka: [{
     	penyuka: Schema.Types.ObjectId,
     	tanggal: { type: Date, default: Date.now }

@@ -10,36 +10,92 @@ var Subkategori = connection.model('Subkategori', SubkategoriSchema);
 
 function SubkategoriControllers() {
 	// Ambil semua subkategori
-	this.getAll = function(req, res) {
+	this.getAllFromKategori = function(req, res) {
+		let id_kategori = req.params.id_kategori;
+
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
-		let subkategori = Number(option.subkategori);
 
-		Subkategori
-			.find()
-			.skip(skip)
-			.limit(limit)
+		let sort = req.params.sort;
+		if (sort == 'z-a') {
+			sort = -1
+		} else {
+			sort = 1
+		}
+
+		Kategori
+			.findById(id_kategori)
+			.populate({
+				path: 'subkategori',
+					match: {
+						status: {
+							$eq: 'terbit'
+						}
+					},
+					skip: skip,
+					limit: limit,
+					options: {
+						sort: {
+							nama: sort
+						}
+					}
+			})
 			.select({
-				meta: 1,
-				nama: 1,
-				deskripsi: 1,
+				subkategori: 1
 			})
-			.sort({
-				nama: 1
-			})
-			.exec(function(err, subkategori) {
+			.exec(function(err, kategori) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil semua subkategori gagal.', err: err});
-				} else if (subkategori == null || subkategori == 0) {
-					res.status(204).json({status: false, message: 'Subategori tidak ditemukan.'});
+				} else if (kategori == null || kategori == 0) {
+					res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
+				} else if (kategori.subkategori == null || kategori.subkategori == 0) {
+					res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil semua subkategori berhasil.', data: subkategori});
+					res.status(200).json({status: true, message: 'Ambil semua subkategori berhasil.', data: kategori.subkategori});
 				}
 			})
 	}
 
-	// Ambil suatu kategori
+	this.countFromKategori = function(req, res) {
+		let id_kategori = mongoose.Types.ObjectId(req.params.id_kategori);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+
+		Kategori
+			.aggregate([{
+				$match: {
+					_id: id_kategori
+				}
+			}, {
+				$unwind: '$subkategori'	// pecah data untuk setiap komentar
+			}, {
+				$lookup: {
+					from: 'subkategoris',	// menggunakan nama collection pada database
+					localField: 'subkategori',
+					foreignField: '_id',
+					as: 'subkategori'
+				}
+			}, {
+				$match: {
+					'subkategori.status': 'terbit'
+				}
+			}, {
+				$group: {
+					_id: '$_id',
+					jumlah_subkategori: {
+						$sum: 1
+					}
+				}
+			}])
+			.exec(function(err, subkategori) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil jumlah subkategori di suatu kategori gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil jumlah subkategori di suatu kategori berhasil.', data: subkategori});
+				}
+			});
+	}
+
+	// Ambil suatu subkategori
 	this.get = function(req, res) {
 		let id = req.params.id;
 
@@ -52,9 +108,9 @@ function SubkategoriControllers() {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil suatu subkategori gagal.', err: err});
 					} else if (subkategori == null || subkategori == 0) {
-						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
+						res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Ambil suatu kategori berhasil.', data: subkategori});
+						res.status(200).json({status: true, message: 'Ambil suatu subkategori berhasil.', data: subkategori});
 					}
 				})
 		}
@@ -62,6 +118,8 @@ function SubkategoriControllers() {
 
 	// Tambah subkategori
 	this.add = function(req, res) {
+		let auth = true;
+		
 		let meta = req.body.meta;
 		let nama = req.body.nama;
 		let deskripsi = req.body.deskripsi;

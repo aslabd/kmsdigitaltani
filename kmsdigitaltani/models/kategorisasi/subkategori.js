@@ -10,6 +10,12 @@ module.exports = new Schema({
 	meta: {
 		thumbnail: String
 	},
+	tanggal: {
+		terbit: { type: Date, default: Date.now },
+		ubah: { type: Date, default: Date.now },
+		hapus: { type: Date, default: null }
+	},
     nama: String,
-    deskripsi: String
+    deskripsi: String,
+    status: { type: String, enum: ['terbit', 'hapus'], default: 'terbit' }
 });

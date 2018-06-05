@@ -25,6 +25,7 @@ var file = require('./routes/lampiran/file');
 var topik = require('./routes/materi/topik');
 var komentar = require('./routes/tanggapan/komentar');
 var balasan = require('./routes/tanggapan/balasan');
+var suka = require('./routes/tanggapan/suka');
 var user = require('./routes/user/user');
 
 // Panggil express
@@ -61,6 +62,8 @@ app.use('/api/tanggapan/komentar', komentar);
 app.use('/api/tanggapan/komentar/*', komentar);
 app.use('/api/tanggapan/balasan', balasan);
 app.use('/api/tanggapan/balasan/*', balasan);
+app.use('/api/tanggapan/suka', suka);
+app.use('/api/tanggapan/suka/*', suka);
 app.use('/api/user', user);
 app.use('/api/user/*', user);
 

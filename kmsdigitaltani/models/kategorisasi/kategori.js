@@ -16,10 +16,16 @@ module.exports = new Schema({
 	meta: {
 		thumbnail: String,
 		jumlah: {
-			subkategori: { type: Number, default: 0 }
+			subkategori: { type: Number, default: null }
 		}
+	},
+	tanggal: {
+		terbit: { type: Date, default: Date.now },
+		ubah: { type: Date, default: Date.now },
+		hapus: { type: Date, default: null }
 	},
     nama: String,
     deskripsi: { type: String, default: null },
+    status: { type: String, enum: ['terbit', 'hapus'], default: 'terbit' },
     subkategori: [{ type: Schema.Types.ObjectId, ref: 'Subkategori' }]
 });

@@ -15,6 +15,14 @@ router.get('/saya/:option/:sort', function(req, res) {
 	topik.getAllByPenulis(req, res);
 });
 
+router.get('/suka/:option/:sort', function(req, res) {
+	topik.getAllBySuka(req, res);
+});
+
+router.get('/cari/:option/:sort/:search', function(req, res) {
+	topik.getAllBySearch(req, res);
+});
+
 router.post('/tulis', function(req, res) {
 	topik.add(req, res);
 });

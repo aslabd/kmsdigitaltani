@@ -5,44 +5,36 @@ var Schema = mongoose.Schema;
 
 var KomentarSchema = require('./../tanggapan/komentar');
 var SubkategoriSchema = require('./../kategorisasi/subkategori');
+var SukaSchema = require('./../tanggapan/suka');
 
 var Komentar = connection.model('Komentar', KomentarSchema);
 var Subkategori = connection.model('Subkategori', SubkategoriSchema);
+var Suka = connection.model('Suka', SukaSchema);
 
 
-module.exports = new Schema({
+var Post = new Schema({
     meta: {
         thumbnail: { type: String, default: null },
+        isi: { type: String, index: true},
         jumlah: {
-            bagi: { type: Number, default: 0, min: 0 },
-            baca: { type: Number, default: 0, min: 0 },
-            suka: { type: Number, default: 0, min: 0 },
-            komentar: { type: Number, default: 0, min: 0 }
+            komentar: { type: Number, default: null },
+            suka: { type: Number, default: null }
         }
     },
-    penulis: Schema.Types.ObjectId,					
+    penulis: { type: Schema.Types.ObjectId, required: true },					
     tanggal: {
         terbit: { type: Date, default: Date.now }, 
-        ubah: { type: Date, default: Date.now } 
+        ubah: { type: Date, default: Date.now },
+        hapus: { type: Date, default: null } 
     },
-    judul: String,
-    ringkasan: { type: String, default: null },
-    isi: String,
+    judul: { type: String, required: true, index: true },
+    ringkasan: { type: String, required: true, index: true },
+    isi: { type: String, required: true },
     subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
-    tag: [{ type: String, default: null }],
+    tag: [{ type: String, default: null, index: true }],
     status: { type: String, enum: ['terbit', 'draft', 'hapus'], default: 'draft' },
-    bagi: [{
-        pembagi: { type: Schema.Types.ObjectId, default: null },
-        tanggal: { type: Date, default: Date.now },
-        via: { type: String, enum: ['facebook', 'twitter', 'whatsapp', 'line', 'url'] } 
-    }],
-    baca: [{
-        pembaca: { type: Schema.Types.ObjectId, default: null },
-        tanggal: { type: Date, default: Date.now } 
-    }],
-    suka: [{
-    	penyuka: Schema.Types.ObjectId,
-        tanggal: { type: Date, default: Date.now } 
-    }],
+    suka: [{ type: Schema.Types.ObjectId, ref: 'Suka' }],
     komentar: [{ type: Schema.Types.ObjectId, ref: 'Komentar' }]
 });
+
+module.exports = Post;

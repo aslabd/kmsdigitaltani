@@ -3,8 +3,12 @@ var router = express.Router();
 
 var balasan = require('./../../controllers/tanggapan/balasan');
 
+router.get('/:id_komentar/jumlah', function(req, res) {
+	balasan.countFromKomentar(req, res);
+});
+
 router.get('/:id_komentar/:option', function(req, res) {
-	balasan.getAll(req, res);
+	balasan.getAllFromKomentar(req, res);
 });
 
 router.post('/tulis', function(req, res) {

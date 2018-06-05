@@ -8,8 +8,8 @@ router.get('/:id', function(req, res) {
 	subkategori.get(req, res);
 });
 
-router.get('/all/:option/:sort', function(req, res) {
-	subkategori.getAll(req, res);
+router.get('/kategori/:id_kategori/:option/:sort', function(req, res) {
+	subkategori.getAllFromKategori(req, res);
 });
 
 router.get('/saya/:option/:sort', function(req, res) {

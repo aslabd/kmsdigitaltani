@@ -13,19 +13,21 @@ function KategoriControllers() {
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 
+		let sort = req.params.sort;
+		if (sort == 'z-a') {
+			sort = '-nama'
+		} else {
+			sort = 'nama'
+		}
+
 		Kategori
 			.find()
 			.skip(skip)
 			.limit(limit)
-			.populate('subkategori', 'nama')
 			.select({
-				meta: 1,
-				nama: 1,
-				deskripsi: 1
+				subkategori: 0
 			})
-			.sort({
-				nama: 1
-			})
+			.sort(sort)
 			.exec(function(err, kategori) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil semua kategori gagal.', err: err});
@@ -85,6 +87,8 @@ function KategoriControllers() {
 
 	// Ubah kategori
 	this.update = function(req, res) {
+		let auth = true;
+
 		let id = req.body.id;
 		let meta = req.body.meta;
 		let nama = req.body.nama;
@@ -103,7 +107,8 @@ function KategoriControllers() {
 							.findByIdAndUpdate(id, {
 								meta: meta,
 								nama: nama,
-								deskripsi: deskripsi
+								deskripsi: deskripsi,
+								'tanggal.ubah': Date.now()
 							})
 							.then(function(kategori) {
 								res.status(200).json({status: true, message: 'Kategori berhasil diubah.'});
@@ -121,6 +126,8 @@ function KategoriControllers() {
 
 	// Hapus kategori
 	this.delete = function(req, res) {
+		let auth = true;
+
 		let id = req.body.id;
 
 		if (id == null) {
@@ -133,7 +140,10 @@ function KategoriControllers() {
 						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
 					} else {
 						Kategori
-							.findByIdAndRemove(id)
+							.findByIdAndUpdate(id, {
+								status: 'hapus',
+								'tanggal.hapus': Date.now()
+							})
 							.then(function(kategori) {
 								res.status(200).json({status: true, message: 'Kategori berhasil dihapus.'});
 							})

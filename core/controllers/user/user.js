@@ -11,7 +11,7 @@ var UserSchema = require('./../../models/pengguna/user');
 var User = connectionPengguna.model('User', UserSchema);
 
 // definisikan fungsi untuk membuat token sebagai async/await
-let createToken = async(user, login_type, remember_me) {
+async function createToken(user, login_type, remember_me) {
 	try {
 		let kadaluarsa;
 
@@ -31,24 +31,24 @@ let createToken = async(user, login_type, remember_me) {
 			expiresIn: kadaluarsa
 		})
 
-		res.status(200).json({status: true, message: 'Token berhasil dibuat.', data: user, token: token});
+		res.status(200).json({status: true, message: 'User terotentikasi dan terotorisasi.', data: user, token: token});
 	} catch (err) {
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
 	}
 }
 
+// fungsi untuk hash password
+var hashPassword = function(password) {
+	return crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+}
+
 function UserControllers() {
 	// Ambil semua user
 	this.getAll = function(req, res) {
-		let auth = {
-			role: 'admin'
-		}
-		let role = 'admin'
+		let auth = true;
 
 		if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'})
-		} else if(auth.role !== role) {
-			res.status(403).json({status: false, message: 'Pengguna tidak memiliki hak akses.'}) 
+			res.status(401).json({status: false, message: 'Otentikasi dan otorisasi gagal.'});
 		} else {
 			let option = JSON.parse(req.params.option);
 			let skip = Number(option.skip);
@@ -80,6 +80,17 @@ function UserControllers() {
 		}
 	}
 
+	this.get = function(req, res) {
+		let auth = true;
+
+		if (auth = false) {
+
+		} else {
+
+		}
+
+	}
+
 	// Tambah user
 	this.add = function(req, res) {
 		let username = req.body.username;
@@ -99,11 +110,11 @@ function UserControllers() {
 				}])
 				.exec(function(err, user) {
 					if (err) {
-						res.status(500).json({})
+						res.status(500).json({status: false, message: 'Cek user sudah ada gagal.', err: err});
 					} else if(user || user != 0) {
 						res.status(400).json({status: false, message: 'Pengguna dengan username atau email tersebut sudah ada. Silahkan login.'});
 					} else {	
-						password = crypto.createHash('sha256').update(password, 'utf8').digest('hex');
+						password = hashPassword(password);
 						
 						User
 							.create({
@@ -113,13 +124,13 @@ function UserControllers() {
 								nama: nama
 							})
 							.then(function(user) {
-								mail.verifikasiAkunBaru(req, res)
+								res.status(200).json({status: true, message: 'Tambah user baru berhasil.'});
 							})
 							.catch(function(err) {
 								res.status(500).json({status: false, message: 'Tambah user baru gagal.', err: err});
 							})
 					}
-				})
+				});
 		}
 	}
 
@@ -132,7 +143,7 @@ function UserControllers() {
 		if(!login_type) {
       		res.status(500).json({ status:500,success: false, message: 'Asal device tidak diketahui'});
   		} else {
-      		password = crypto.createHash('md5').update(req.body.password + 'portalharga', 'utf8').digest('hex');
+      		password =hashPassword(password);
       		// find the user
       		User
       			.findOne()
@@ -148,20 +159,21 @@ function UserControllers() {
             			res.status(204).json({status: false, message: 'Otentikasi gagal. Username atau password salah.' });
           			} else {
           				// panggil fungsi membuat token
-          				createToken(user, login_type, remember_me);          				
+          				createToken(user, login_type, remember_me);
           			}
           		});
        	}
 	}
 
-	this.authorization = function(req, res) {
+	this.authByRole = function(req, res) {
 		let token = req.body.token;
 		let role = req.body.role;
+
 		jwt.verify(token, secret, function(err, decoded) {
 			if (err) {
-				res.status(401).json({status: false, message: 'Pengguna tidak terotentikasi', err: err});
+				res.status(401).json({status: false, message: 'User tidak terotentikasi', err: err});
 			} else if (!role.includes(decoded.user.role)) {
-				res.status(403).json({status: false, message: 'Pengguna tidak memliki hak akses ke resource'})
+				res.status(403).json({status: false, message: 'User tidak memiliki hak akses ke resource'})
 			} else {
 				createToken(decoded.user, decoded.login_type, decoded.remember_me);
 			}

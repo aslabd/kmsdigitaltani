@@ -20,28 +20,20 @@ router.get('/suka/:option/:sort', function(req, res) {
 	tanya.getAllBySuka(req, res);
 });
 
-router.post('/tulis', function(req, res) {
-	tanya.add(req, res);
+router.get('/cari/:option/:sort/:search', function(req, res) {
+	tanya.getAllBySearch(req, res);
 });
 
-router.delete('/hapus', function(req, res) {
-	tanya.delete(req, res);
+router.post('/tulis', function(req, res) {
+	tanya.add(req, res);
 });
 
 router.patch('/ubah', function(req, res) {
 	tanya.update(req, res);
 });
 
-router.put('/suka', function(req, res) {
-	tanya.addSuka(req, res);
-});
-
-router.put('/baca', function(req, res) {
-	tanya.baca(req, res);
-});
-
-router.put('/bagi', function(req, res) {
-	tanya.bagi(req, res);
+router.delete('/hapus', function(req, res) {
+	tanya.delete(req, res);
 });
 
 module.exports = router;

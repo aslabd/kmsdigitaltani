@@ -332,9 +332,12 @@ function TopikControllers() {
 			let status = req.body.status;
 			let materi = req.body.materi;
 			if (meta.thumbnail == null || meta.thumbnail == 0) {
+				console.log("hahaha")
 				if (materi == null || materi == 0) {
+					console.log("hihihi")
 					meta.thumbnail = null;
 				} else {
+					console.log("huhuhu")
 					File
 						.findById(materi[0])
 						.then(function(file) {

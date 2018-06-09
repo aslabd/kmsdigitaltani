@@ -23,7 +23,7 @@ module.exports = new Schema({
         thumbnail: { type: String, default: null },
         jumlah: {
             suka: { type: Number, default: null },
-            komentar: { type: Number, default: 0 }
+            komentar: { type: Number, default: null }
         }
     },
     penulis: { type: Schema.Types.ObjectId, required: true },                 

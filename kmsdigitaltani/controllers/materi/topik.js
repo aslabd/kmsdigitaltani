@@ -338,7 +338,7 @@ function TopikControllers() {
 					File
 						.findById(materi[0])
 						.then(function(file) {
-							console.log(file);
+							console.log(file.meta.thumbnail);
 							if (file == null || file == 0) {
 								meta.thumbnail = null;
 							} else {

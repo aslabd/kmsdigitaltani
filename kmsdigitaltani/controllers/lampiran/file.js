@@ -190,14 +190,7 @@ function FileControllers() {
 				} else if (req.file == null || req.file == 0) {
 					res.status(400).json({status: false, message: 'File kosong.'});
 				} else {
-					let options = {
-						width: 200,
-						height: 200,
-						quality: 80,
-						background: '#ffffff'
-					};
-
-					filepreview.generate(path.resolve(direktori + '/' + nama.sistem), path.resolve('uploads/thumbnail/' + path.basename(nama.sistem, extension) + '.jpg'), options, function(err) {
+					filepreview.generate(path.resolve(direktori + '/' + nama.sistem), path.resolve('uploads/thumbnail/' + path.basename(nama.sistem, extension) + '.jpg'), function(err) {
 						if (err) {
 					    	res.status(500).json({status: false, message: 'Ambil thumbnail file gagal.', err: err})
 						} else {

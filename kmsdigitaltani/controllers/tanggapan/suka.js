@@ -32,14 +32,26 @@ function SukaControllers() {
 					as: 'suka'
 				}
 			}, {
-				$match: {
-					_id: id_post,
-					'suka.penyuka': penyuka
+				$project: {
+					suka: {
+						$cond: {
+							if: {
+								$match: {
+									_id: id_post,
+									'suka.penyuka': penyuka
+								}
+							},
+							then: true,
+							else: false
+						}
+					}
 				}
 			}])
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu artikel gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: })
 				} else {
 					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu artikel berhasil.', data: suka})
 				}

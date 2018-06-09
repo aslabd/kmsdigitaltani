@@ -36,7 +36,7 @@ async function getMetaForTopik(topik, res) {
 		} else {
 			topik.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
 		}
-		res.status(200).json({status: true, message: 'Ambil suatu materi berhasil.', data: tanya});
+		res.status(200).json({status: true, message: 'Ambil suatu materi berhasil.', data: topik});
 	} catch (err) {
 		console.log(err);
 		res.status(500).json({status: false, message: 'Ambil meta materi gagal.', err: err});

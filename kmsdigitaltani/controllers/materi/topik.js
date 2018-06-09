@@ -270,6 +270,13 @@ function TopikControllers() {
 						'suka.tanggal': sort
 					}
 				}, {
+					$lookup: {
+						from: 'subkategoris',
+						localField: 'subkategori',
+						foreignField: '_id',
+						as: 'subkategori'
+					}
+				}, {
 					$skip: skip
 				}, {
 					$limit: limit

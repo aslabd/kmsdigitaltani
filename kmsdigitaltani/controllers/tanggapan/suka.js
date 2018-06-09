@@ -34,15 +34,13 @@ function SukaControllers() {
 			}, {
 				$project: {
 					suka: {
-						$cond: {
-							if: {
+						$and: {
+							[{
 								$match: {
 									_id: id_post,
 									'suka.penyuka': penyuka
 								}
-							},
-							then: true,
-							else: false
+							}]
 						}
 					}
 				}

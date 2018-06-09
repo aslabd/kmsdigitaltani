@@ -337,7 +337,7 @@ function TopikControllers() {
 					console.log("hihihi")
 					meta.thumbnail = null;
 				} else {
-					console.log("huhuhu")
+					console.log(materi[0])
 					File
 						.findById(materi[0])
 						.then(function(file) {

@@ -24,9 +24,7 @@ function KategoriControllers() {
 			.find()
 			.skip(skip)
 			.limit(limit)
-			.select({
-				subkategori: 0
-			})
+			.populate('subkategori')
 			.sort(sort)
 			.exec(function(err, kategori) {
 				if (err) {

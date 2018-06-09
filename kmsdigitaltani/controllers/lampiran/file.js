@@ -113,7 +113,7 @@ function FileControllers() {
 		if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else {
-			let meta;
+			let meta = {};
 			let nama;
 			let mimetype;
 			let ukuran;

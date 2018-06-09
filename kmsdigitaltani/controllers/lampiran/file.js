@@ -73,18 +73,13 @@ function FileControllers() {
 	}
 
 	// this.getAllByPemilik = function(req, res) {
-	// 	let auth = {
-	// 		role: 'admin'
-	// 	}
-	// 	let role = 'admin'
+	// 	let auth = true
 
 	// 	let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
 	// 	let pemilik = decoded._id;
 
 	// 	if (auth == false) {
 	// 		res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-	// 	} else if (role !== auth.role) {
-	// 		res.status(401).json({status: false, message: 'Otorisasi gagal.'});
 	// 	} else {
 	// 		let option = JSON.parse(req.params.option);
 	// 		let skip = option.skip;
@@ -112,125 +107,119 @@ function FileControllers() {
 	// 	}
 	// }
 
-	// this.upload = function(req, res) {
-	// 	let auth = {
-	// 		role: 'admin'
-	// 	}
-	// 	let role = 'admin'
+	this.upload = function(req, res) {
+		let auth = true;
 
-	// 	if (auth == false) {
-	// 		res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-	// 	} else if (role !== auth.role) {
-	// 		res.status(401).json({status: false, message: 'Otorisasi gagal.'});
-	// 	} else {
-	// 		let meta;
-	// 		let nama;
-	// 		let mimetype;
-	// 		let ukuran;
-	// 		let extension;
-	// 		let direktori;
-	// 		let jenis;
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else {
+			let meta;
+			let nama;
+			let mimetype;
+			let ukuran;
+			let extension;
+			let direktori;
+			let jenis;
 
-	// 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-	// 		let pemilik = decoded._id;
+			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+			let pemilik = decoded._id;
 
-	// 		// untuk ukuran file
-	// 		let max_size;
+			// untuk ukuran file
+			let max_size;
 
-	// 		// definisikan mimetypes yang diizinkan
-	// 		let gambar_mimetypes = ['image/png', 'image/jpg', 'image/jpeg'];
-	// 		let materi_mimetypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'];
-	// 		let allowed_mimetypes = [].concat(gambar_mimetypes, materi_mimetypes);
+			// definisikan mimetypes yang diizinkan
+			let gambar_mimetypes = ['image/png', 'image/jpg', 'image/jpeg'];
+			let materi_mimetypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'];
+			let allowed_mimetypes = [].concat(gambar_mimetypes, materi_mimetypes);
 			
-	// 		// definisikan ekstensi yang diizinkan
-	// 		let gambar_extensions = ['.png', '.jpg', '.jpeg'];
-	// 		let materi_extensions = ['.pdf', '.pptx', '.ppt'];
-	// 		let allowed_extensions = [].concat(gambar_extensions, materi_extensions);
+			// definisikan ekstensi yang diizinkan
+			let gambar_extensions = ['.png', '.jpg', '.jpeg'];
+			let materi_extensions = ['.pdf', '.pptx', '.ppt'];
+			let allowed_extensions = [].concat(gambar_extensions, materi_extensions);
 			
-	// 		let storage = multer.diskStorage({
-	// 			destination: function (req, file, cb) {
-	// 				if ((gambar_mimetypes.includes(file.mimetype)) && (gambar_extensions.includes(extension))) {
-	// 	            	jenis = 'gambar';
-	// 	            	direktori = path.resolve('uploads/gambar/');
-	// 				} else if ((materi_mimetypes.includes(file.mimetype)) && (materi_extensions.includes(extension))) {
-	// 					jenis = 'materi';
-	// 					direktori = path.resolve('uploads/materi/');
-	// 				}
-	// 		    	cb(null, direktori)
-	// 			},
-	// 			filename: function (req, file, cb) {
-	// 				nama = {
-	// 					asli: file.originalname,
-	// 					sistem: jenis + '-' + Date.now() + path.extname(file.originalname).toLowerCase()
-	// 				};
-	// 		    	cb(null, nama.sistem)
-	// 			}
-	// 		});
+			let storage = multer.diskStorage({
+				destination: function (req, file, cb) {
+					if ((gambar_mimetypes.includes(file.mimetype)) && (gambar_extensions.includes(extension))) {
+		            	jenis = 'gambar';
+		            	direktori = path.resolve('uploads/gambar/');
+					} else if ((materi_mimetypes.includes(file.mimetype)) && (materi_extensions.includes(extension))) {
+						jenis = 'materi';
+						direktori = path.resolve('uploads/materi/');
+					}
+			    	cb(null, direktori)
+				},
+				filename: function (req, file, cb) {
+					nama = {
+						asli: file.originalname,
+						sistem: jenis + '-' + Date.now() + path.extname(file.originalname).toLowerCase()
+					};
+			    	cb(null, nama.sistem)
+				}
+			});
 
-	// 		let upload = multer({
-	// 			storage: storage,
-	// 			fileFilter: function(req, file, cb) {
-	// 				ukuran = file.size;
-	// 				extension = path.extname(file.originalname).toLowerCase();
-	// 				if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
-	// 	            	return cb(new Error('File kosong atau format file tidak diizinkan.'));
-	// 				} else {
-	// 					cb(null, true)
-	// 				}
-	// 			},
-	// 			limits: {
-	// 				// mendefinisikan file size yang bisa diupload
-	// 				fileSize: 5 * 1024 * 1024
-	// 			}
-	// 		}).single('file');
+			let upload = multer({
+				storage: storage,
+				fileFilter: function(req, file, cb) {
+					ukuran = file.size;
+					extension = path.extname(file.originalname).toLowerCase();
+					if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
+		            	return cb(new Error('File kosong atau format file tidak diizinkan.'));
+					} else {
+						cb(null, true)
+					}
+				},
+				limits: {
+					// mendefinisikan file size yang bisa diupload
+					fileSize: 5 * 1024 * 1024
+				}
+			}).single('file');
 
-	// 		upload(req, res, function(err) {
-	// 			if (err) {
-	// 				if (err.code == 'LIMIT_FILE_SIZE') {
-	// 					res.status(400).json({status: false, message: 'File berukuran melebihi yang diizinkan.', err: err});
-	// 				} else {
-	// 					res.status(500).json({status: false, message: 'File gagal diunggah.', err: err});
-	// 				}
-	// 			} else if (req.file == null || req.file == 0) {
-	// 				res.status(400).json({status: false, message: 'File kosong.'});
-	// 			} else {
-	// 				let options = {
-	// 					width: 500,
-	// 					height: 500,
-	// 					quality: 100,
-	// 					background: '#ffffff',
-	// 					pagerange: '1'
-	// 				};
+			upload(req, res, function(err) {
+				if (err) {
+					if (err.code == 'LIMIT_FILE_SIZE') {
+						res.status(400).json({status: false, message: 'File berukuran melebihi yang diizinkan.', err: err});
+					} else {
+						res.status(500).json({status: false, message: 'File gagal diunggah.', err: err});
+					}
+				} else if (req.file == null || req.file == 0) {
+					res.status(400).json({status: false, message: 'File kosong.'});
+				} else {
+					let options = {
+						width: 200,
+						height: 200,
+						quality: 80,
+						background: '#ffffff'
+					};
 
-	// 				filepreview.generate(path.resolve(direktori + '/' + nama.sistem), path.resolve('uploads/thumbnail/' + path.basename(nama.sistem, extension) + '.jpg'), options, function(err) {
-	// 					if (err) {
-	// 				    	res.status(500).json({status: false, message: 'Ambil thumbnail file gagal.', err: err})
-	// 					} else {
-	// 						meta.thumbnail = configuration.host + '/lampiran/file/' + path.basename(nama.sistem, extension) + '.jpg';
+					filepreview.generate(path.resolve(direktori + '/' + nama.sistem), path.resolve('uploads/thumbnail/' + path.basename(nama.sistem, extension) + '.jpg'), options, function(err) {
+						if (err) {
+					    	res.status(500).json({status: false, message: 'Ambil thumbnail file gagal.', err: err})
+						} else {
+							meta.thumbnail = configuration.host + '/lampiran/file/' + path.basename(nama.sistem, extension) + '.jpg';
 
-	// 						File
-	// 							.create({
-	// 								meta: meta,
-	// 								pemilik: pemilik,
-	// 								nama: nama,
-	// 								jenis: jenis,
-	// 								ukuran: ukuran,
-	// 								mimetype: mimetype,
-	// 								extension: extension,
-	// 								direktori: direktori
-	// 							})
-	// 							.then(function(file) {
-	// 								res.status(200).json({status: true, message: 'Unggah file berhasil.', data: file});
-	// 							})
-	// 							.catch(function(err) {
-	// 								res.status(500).json({status: false, message: 'Unggah file gagal.', err: err});
-	// 							});
-	// 					}
-	// 				});
-	// 			}
-	// 		})
-	// 	}
-	// }
+							File
+								.create({
+									meta: meta,
+									pemilik: pemilik,
+									nama: nama,
+									jenis: jenis,
+									ukuran: ukuran,
+									mimetype: mimetype,
+									extension: extension,
+									direktori: direktori
+								})
+								.then(function(file) {
+									res.status(200).json({status: true, message: 'Unggah file berhasil.', data: file});
+								})
+								.catch(function(err) {
+									res.status(500).json({status: false, message: 'Unggah file gagal.', err: err});
+								});
+						}
+					});
+				}
+			})
+		}
+	}
 }
 
 module.exports = new FileControllers();

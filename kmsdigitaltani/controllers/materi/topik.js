@@ -338,10 +338,11 @@ function TopikControllers() {
 					File
 						.findById(materi[0])
 						.then(function(file) {
-							console.log(file.meta.thumbnail);
 							if (file == null || file == 0) {
+								console.log("wow")
 								meta.thumbnail = null;
 							} else {
+								console.log("wiw")
 								meta.thumbnail = file.meta.thumbnail;
 							}
 						})

@@ -18,6 +18,146 @@ var Balasan = connection.model('Balasan', BalasanSchema);
 var Suka = connection.model('Suka', SukaSchema);
 
 function SukaControllers() {
+	this.isSayaSukaPost = function(req, res) {
+		let id_post = mongoose.Types.ObjectId(req.params.id_post);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let penyuka = decoded._id;
+
+		Post
+			.aggregate([{
+				$lookup: {
+					from: 'sukas',
+					localField: 'suka',
+					foreignField: '_id',
+					as: 'suka'
+				}
+			}, {
+				$match: {
+					_id: id_post,
+					'suka.penyuka': penyuka
+				}
+			}])
+			.exec(function(err, suka) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu artikel gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu artikel berhasil.', data: suka})
+				}
+			});
+	}
+
+	this.isSayaSukaTanya = function(req, res) {
+		let id_tanya = mongoose.Types.ObjectId(req.params.id_tanya);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let penyuka = decoded._id;
+
+		Tanya
+			.aggregate([{
+				$lookup: {
+					from: 'sukas',
+					localField: 'suka',
+					foreignField: '_id',
+					as: 'suka'
+				}
+			}, {
+				$match: {
+					_id: id_tanya,
+					'suka.penyuka': penyuka
+				}
+			}])
+			.exec(function(err, suka) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu pertanyaan gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu pertanyaan berhasil.', data: suka})
+				}
+			});
+	}
+
+	this.isSayaSukaTopik = function(req, res) {
+		let id_topik = mongoose.Types.ObjectId(req.params.id_topik);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let penyuka = decoded._id;
+
+		Topik
+			.aggregate([{
+				$lookup: {
+					from: 'sukas',
+					localField: 'suka',
+					foreignField: '_id',
+					as: 'suka'
+				}
+			}, {
+				$match: {
+					_id: id_topik,
+					'suka.penyuka': penyuka
+				}
+			}])
+			.exec(function(err, suka) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu materi gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu materi berhasil.', data: suka})
+				}
+			});
+	}
+
+	this.isSayaSukaKomentar = function(req, res) {
+		let id_komentar = mongoose.Types.ObjectId(req.params.id_komentar);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let penyuka = decoded._id;
+
+		Komentar
+			.aggregate([{
+				$lookup: {
+					from: 'sukas',
+					localField: 'suka',
+					foreignField: '_id',
+					as: 'suka'
+				}
+			}, {
+				$match: {
+					_id: id_komentar,
+					'suka.penyuka': penyuka
+				}
+			}])
+			.exec(function(err, suka) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu komentar gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu komentar berhasil.', data: suka})
+				}
+			});
+	}
+
+	this.isSayaSukaBalasan = function(req, res) {
+		let id_balasan = mongoose.Types.ObjectId(req.params.id_balasan);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let penyuka = decoded._id;
+
+		Balasan
+			.aggregate([{
+				$lookup: {
+					from: 'sukas',
+					localField: 'suka',
+					foreignField: '_id',
+					as: 'suka'
+				}
+			}, {
+				$match: {
+					_id: id_balasan,
+					'suka.penyuka': penyuka
+				}
+			}])
+			.exec(function(err, suka) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu balasan gagal.', err: err});
+				} else {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu balasan berhasil.', data: suka})
+				}
+			});
+	}
+
 	// fungsi hitung jumlah suka di artikel
 	this.countFromPost = function(req, res) {
 		let id_post = mongoose.Types.ObjectId(req.params.id_post);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
@@ -155,7 +295,7 @@ function SukaControllers() {
 	}
 
 	// fungsi suka/batal suka artikel
-	this.sukaToPost = function(req, res) {
+	this.ubahToPost = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -245,7 +385,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.sukaToTanya = function(req, res) {
+	this.ubahToTanya = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -335,7 +475,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.sukaToTopik = function(req, res) {
+	this.ubahToTopik = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -425,7 +565,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.sukaToKomentar = function(req, res) {
+	this.ubahToKomentar = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};
@@ -515,7 +655,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.sukaToBalasan = function(req, res) {
+	this.ubahToBalasan = function(req, res) {
 		let auth = {
 			role: 'admin'
 		};

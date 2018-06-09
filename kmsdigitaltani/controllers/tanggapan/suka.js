@@ -34,14 +34,12 @@ function SukaControllers() {
 			}, {
 				$project: {
 					suka: {
-						$and: {
-							[{
-								$match: {
-									_id: id_post,
-									'suka.penyuka': penyuka
-								}
-							}]
-						}
+						$and: [{
+							$match: {
+								_id: id_post,
+								'suka.penyuka': penyuka
+							}
+						}]
 					}
 				}
 			}])

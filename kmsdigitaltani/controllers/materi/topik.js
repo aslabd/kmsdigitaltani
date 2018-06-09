@@ -331,26 +331,26 @@ function TopikControllers() {
 			let deskripsi = req.body.deskripsi;
 			let status = req.body.status;
 			let materi = req.body.materi;
-			if (meta.thumbnail == null || meta.thumbnail == 0) {
-				if (materi == null || materi == 0) {
-					meta.thumbnail = null;
-				} else {
-					File
-						.findById(materi[0])
-						.then(function(file) {
-							if (file == null || file == 0) {
-								console.log("wow")
-								meta.thumbnail = null;
-							} else {
-								console.log("wiw")
-								meta.thumbnail = file.meta.thumbnail;
-							}
-						})
-						.catch(function(err) {
-							res.status(500).json({status: false, message: 'Ambil file gagal.', err: err});
-						})
-				}
-			}
+			// if (meta.thumbnail == null || meta.thumbnail == 0) {
+			// 	if (materi == null || materi == 0) {
+			// 		meta.thumbnail = null;
+			// 	} else {
+			// 		File
+			// 			.findById(materi[0])
+			// 			.then(function(file) {
+			// 				if (file == null || file == 0) {
+			// 					console.log("wow")
+			// 					meta.thumbnail = null;
+			// 				} else {
+			// 					console.log("wiw")
+			// 					meta.thumbnail = file.meta.thumbnail;
+			// 				}
+			// 			})
+			// 			.catch(function(err) {
+			// 				res.status(500).json({status: false, message: 'Ambil file gagal.', err: err});
+			// 			})
+			// 	}
+			// }
 			let tag = req.body.tag;
 			let subkategori = req.body.subkategori;
 

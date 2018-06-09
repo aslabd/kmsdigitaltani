@@ -2,7 +2,7 @@
 var jwt = require('jsonwebtoken');
 var multer = require('multer');
 var path = require('path');
-// var filepreview = require('filepreview');
+var filepreview = require('filepreview');
 
 // 
 var configuration = require('./../../configuration');

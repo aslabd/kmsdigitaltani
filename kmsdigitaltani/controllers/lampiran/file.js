@@ -30,9 +30,7 @@ function FileControllers() {
 			File
 				.find()
 				.where('jenis').equals(jenis)
-				.sort({
-					'tanggal.unggah': 1
-				})
+				.sort('-tanggal.unggah')
 				.exec(function(err, file) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil beberapa file gagal.', err: err});
@@ -43,6 +41,14 @@ function FileControllers() {
 					}
 				});
 		}
+	}
+
+	this.getThumbnail = function(req, res) {
+		res.sendFile(path.resolve('uploads/thumbnail/' + req.params.filename) , function(err) {
+			if (err) {
+				res.status(500).json({status: false, message: 'Stream thumbnail gagal.', err: err});
+			}
+		});
 	}
 
 	this.getFile = function(req, res) {
@@ -72,40 +78,40 @@ function FileControllers() {
 			});
 	}
 
-	// this.getAllByPemilik = function(req, res) {
-	// 	let auth = true
+	this.getAllByPemilik = function(req, res) {
+		let auth = true
 
-	// 	let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-	// 	let pemilik = decoded._id;
+		let option = JSON.parse(req.params.option);
 
-	// 	if (auth == false) {
-	// 		res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-	// 	} else {
-	// 		let option = JSON.parse(req.params.option);
-	// 		let skip = option.skip;
-	// 		let limit = option.limit;
-	// 		let jenis = option.jenis;
+		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
+		let pemilik = decoded._id;
 
-	// 		File
-	// 			.find()
-	// 			.skip(skip)
-	// 			.limit(limit)
-	// 			.where('pemilik').equals(pemilik)
-	// 			.where('jenis').equals(jenis)
-	// 			.sort({
-	// 				'tanggal.upload': 1
-	// 			})
-	// 			.exec(function(err, file) {
-	// 				if (err) {
-	// 					res.status(500).json({status: true, message: 'Ambil file saya gagal.', err: err});
-	// 				} else if (file == null || file == 0) {
-	// 					res.status(204).json({status: false, message: 'File tidak ditemukan.'});
-	// 				} else {
-	// 					res.status(200).json({status: true, message: 'Ambil file saya berhasil.', data: file});
-	// 				}
-	// 			});
-	// 	}
-	// }
+		if (auth == false) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else {
+			let option = JSON.parse(req.params.option);
+			let skip = option.skip;
+			let limit = option.limit;
+			let jenis = option.jenis;
+
+			File
+				.find()
+				.skip(skip)
+				.limit(limit)
+				.where('pemilik').equals(pemilik)
+				.where('jenis').equals(jenis)
+				.sort('-tanggal.unggah')
+				.exec(function(err, file) {
+					if (err) {
+						res.status(500).json({status: true, message: 'Ambil file saya gagal.', err: err});
+					} else if (file == null || file == 0) {
+						res.status(204).json({status: false, message: 'File tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil file saya berhasil.', data: file});
+					}
+				});
+		}
+	}
 
 	this.upload = function(req, res) {
 		let auth = true;
@@ -195,7 +201,7 @@ function FileControllers() {
 						if (err) {
 					    	res.status(500).json({status: false, message: 'Ambil thumbnail file gagal.', err: err})
 						} else {
-							meta.thumbnail = configuration.host + '/lampiran/file/' + path.basename(nama.sistem, extension) + '.jpg';
+							meta.thumbnail = configuration.host + '/lampiran/file/thumbnail/' + path.basename(nama.sistem, extension) + '.jpg';
 
 							File
 								.create({

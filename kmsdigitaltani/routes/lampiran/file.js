@@ -7,6 +7,10 @@ router.get('/:filename', function(req, res) {
 	file.getFile(req, res);
 });
 
+router.get('/thumbnail/:filename', function(req, res) {
+	file.getThumbnail(req, res);
+});
+
 router.get('/all/:option', function(req, res) {
 	file.getAll(req, res);
 });

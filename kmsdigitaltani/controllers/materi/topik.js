@@ -38,6 +38,7 @@ async function getMetaForTopik(topik, res) {
 		}
 		res.status(200).json({status: true, message: 'Ambil suatu materi berhasil.', data: tanya});
 	} catch (err) {
+		console.log(err);
 		res.status(500).json({status: false, message: 'Ambil meta materi gagal.', err: err});
 	}
 }

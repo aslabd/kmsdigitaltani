@@ -16,55 +16,51 @@ var TanyaSchema = require('./../../models/diskusi/tanya');
 var Tanya = connection.model('Tanya', TanyaSchema);
 
 // Fungsi untuk mengambil meta pertanyaan
-async function getMetaForTanya(tanya, res) {
-	try {
-		let suka = await fetch(configuration.host + '/tanggapan/suka/diskusi/' + tanya._id + '/jumlah');
-		let komentar = await fetch(configuration.host + '/tanggapan/komentar/diskusi/' + tanya._id + '/jumlah');
-		let suka_json = await suka.json();
-		let komentar_json = await komentar.json();
-		if (suka_json.data[0] == null) {
-			tanya.meta.jumlah.suka = 0;
-		} else {
-			tanya.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-		}
-		if (komentar_json.data[0] == null) {
-			tanya.meta.jumlah.komentar = 0;
-		} else {
-			tanya.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-		}
-		res.status(200).json({status: true, message: 'Ambil suatu pertanyaan berhasil.', data: tanya});
-	} catch (err) {
-		res.status(500).json({status: false, message: 'Ambil meta pertanyaan gagal.', err: err});
-	}
-}
+async function getMetaForTanyas(req, tanyas, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
 
-async function getMetaForTanyas(tanyas, res) {
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
 	for (let item of tanyas) {
 		try {
-			let suka = await fetch(configuration.host + '/tanggapan/suka/diskusi/' + item._id + '/jumlah');
-			let komentar = await fetch(configuration.host + '/tanggapan/komentar/diskusi/' + item._id + '/jumlah');
-			
-			let suka_json = await suka.json();
-			let komentar_json = await komentar.json();
-			if (komentar_json.data[0] == null) {
-				item.meta.jumlah.komentar = 0;
-			} else {
-				item.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-			}
-			if (suka_json.data[0] == null) {
-				item.meta.jumlah.suka = 0;
-			} else {
-				item.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-			}
+			let meta = await fetch(configuration.host + '/meta/meta/diskusi/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {
-			console.log(err);
 			break;
-			res.status(500).json({status: false, message: 'Ambil meta pertanyaan gagal.', err: err});
+			res.status(500).json({status: false, message: 'Ambil meta diskusi gagal.', err: err});
 		}
 	}
-	res.status(200).json({status: true, message: 'Ambil pertanyaan berhasil.', data: tanyas});
+	res.status(200).json({status: true, message: 'Ambil diskusi berhasil.', data: tanyas});
 }
 
+async function getMetaForTanya(req, tanya, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	try {
+		let meta = await fetch(configuration.host + '/meta/meta/diskusi/' + tanya._id, options);
+		let meta_json = await meta.json();
+		tanya.meta = Object.assign(tanya.meta, meta_json.data);
+		res.status(200).json({status: true, message: 'Ambil diskusi berhasil.', data: tanya});
+	} catch (err) {
+		console.log(err)
+		res.status(500).json({status: false, message: 'Ambil meta diskusi gagal.', err: err});
+	}
+}
+
+// fungsi controller Tanya
 function TanyaControllers() {
 	// Ambil semua pertanyaan
 	this.getAll = function(req, res) {
@@ -88,7 +84,7 @@ function TanyaControllers() {
 			Tanya
 				.find()
 				.where('status').equals('terbit')
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -102,7 +98,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(tanya, res);
+						getMetaForTanyas(req, tanya, res);
 					}
 				});
 		} else {
@@ -110,7 +106,7 @@ function TanyaControllers() {
 				.find()
 				.where('status').equals('terbit')
 				.where('subkategori').equals(subkategori)
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -124,7 +120,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(tanya, res);
+						getMetaForTanyas(req, tanya, res);
 					}
 				});
 		}
@@ -160,7 +156,7 @@ function TanyaControllers() {
 					}
 				})
 				.where('status').equals('terbit')
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -176,7 +172,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(post, res);
+						getMetaForTanyas(req, post, res);
 					}
 				});
 		} else {
@@ -188,7 +184,7 @@ function TanyaControllers() {
 				})
 				.where('status').equals('terbit')
 				.where('subkategori').equals(subkategori)
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -204,7 +200,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(post, res);
+						getMetaForTanyas(req, post, res);
 					}
 				});
 		}
@@ -236,7 +232,7 @@ function TanyaControllers() {
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').in(['terbit', 'draft'])
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -250,7 +246,7 @@ function TanyaControllers() {
 						} else if (tanya == null || tanya == 0) {
 							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 						} else {
-							getMetaForTanyas(tanya, res);
+							getMetaForTanyas(req, tanya, res);
 						}
 					});
 			} else {
@@ -258,7 +254,7 @@ function TanyaControllers() {
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').equals(status)
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -272,7 +268,7 @@ function TanyaControllers() {
 						} else if (tanya == null || tanya == 0) {
 							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 						} else {
-							getMetaForTanyas(tanya, res);
+							getMetaForTanyas(req, tanya, res);
 						}
 					});
 			}
@@ -339,7 +335,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(tanya, res);
+						getMetaForTanyas(req, tanya, res);
 					}
 				});
 		}
@@ -353,7 +349,7 @@ function TanyaControllers() {
 		} else {
 			Tanya
 				.findById(id)
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.select({
 					suka: 0,
 					komentar: 0
@@ -364,7 +360,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanya(tanya, res);
+						getMetaForTanya(req, tanya, res);
 					}
 				})
 		}

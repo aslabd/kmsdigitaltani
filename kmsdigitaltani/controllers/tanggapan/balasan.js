@@ -9,23 +9,27 @@ var BalasanSchema = require('./../../models/tanggapan/balasan');
 var Komentar = connection.model('Komentar', KomentarSchema);
 var Balasan = connection.model('Balasan', BalasanSchema);
 
-async function getMetaForBalasans(balasans, res) {
+async function getMetaForBalasans(req, balasans, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
 	for (let item of balasans) {
 		try {
-			let suka = await fetch(configuration.host + '/tanggapan/suka/balasan/' + item._id + '/jumlah');			
-			let suka_json = await suka.json();
-
-			if (suka_json.data[0] == null) {
-				item.meta.jumlah.suka = 0;
-			} else {
-				item.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-			}
+			let meta = await fetch(configuration.host + '/meta/meta/artikel/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {
 			break;
 			res.status(500).json({status: false, message: 'Ambil meta balasan gagal.', err: err});
 		}
 	}
-	res.status(200).json({status: true, message: 'Ambil balasan berhasil.', data: komentars});
+	res.status(200).json({status: true, message: 'Ambil balasan berhasil.', data: balasans});
 }
 
 function BalasanControllers() {
@@ -62,7 +66,7 @@ function BalasanControllers() {
 					} else if (komentar.balasan == null || komentar.balasan == 0) {
 						res.status(204).json({status: false, message: 'Balasan tidak ditemukan.'});
 					} else {
-						getMetaForBalasans(komentar.balasan, res);
+						getMetaForBalasans(req, komentar.balasan, res);
 					}
 				});
 		}
@@ -173,21 +177,6 @@ function BalasanControllers() {
 			}
 		}
 	}
-
-	// this.update = function(req, res) {
-	// 	let auth = true;
-
-	// 	if (auth == false) {
-	// 		res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-	// 	} else {
-	// 		let id = req.body.id;
-	// 		let isi = req.body.isi;
-
-	// 		Balasan
-	// 			.findById(id)
-	// 			.then(function())
-	// 	}
-	// }
 
 	this.delete = function(req, res) {
 		let auth = true;

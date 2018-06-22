@@ -14,6 +14,9 @@ module.exports = new Schema({
 	meta: {
 		jumlah:{
             suka: { type: Number, default: 0 }
+        },
+        saya: {
+            suka: { type: Boolean, default: null }
         }
 	},
     penulis: Schema.Types.ObjectId,

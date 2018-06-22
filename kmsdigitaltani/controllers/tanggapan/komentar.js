@@ -17,54 +17,48 @@ var Tanya = connection.model('Tanya', TanyaSchema);
 var Topik = connection.model('Topik', TopikSchema);
 var Komentar = connection.model('Komentar', KomentarSchema);
 
-async function getMetaForKomentar(komentar, res) {
-	try {
-		let balasan = await fetch(configuration.host + '/tanggapan/balasan/' + komentar._id + '/jumlah');
-		let suka = await fetch(configuration.host + '/tanggapan/suka/komentar/' + komentar._id + '/jumlah');
-		let balasan_json = await balasan.json();
-		let suka_json = await suka.json();
+async function getMetaForKomentars(req, komentars, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
 
-		if (balasan_json.data[0] == null) {
-			komentar.meta.jumlah.balasan = 0;
-		} else {
-			komentar.meta.jumlah.balasan = balasan_json.data[0].jumlah_balasan;
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
 		}
-		if (suka_json.data[0] == null) {
-			komentar.meta.jumlah.suka = 0;
-		} else {
-			komentar.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-		}
-		res.status(200).json({status: true, message: 'Ambil suatu komentar berhasil.', data: komentar});
-	} catch (err) {
-		console.log(err)
-		res.status(500).json({status: false, message: 'Ambil meta komentar gagal.', err: err});
 	}
-}
 
-async function getMetaForKomentars(komentars, res) {
 	for (let item of komentars) {
 		try {
-			let balasan = await fetch(configuration.host + '/tanggapan/balasan/' + item._id + '/jumlah');
-			let suka = await fetch(configuration.host + '/tanggapan/suka/komentar/' + item._id + '/jumlah');			
-			let balasan_json = await balasan.json();
-			let suka_json = await suka.json();
-
-			if (balasan_json.data[0] == null) {
-				item.meta.jumlah.balasan = 0;
-			} else {
-				item.meta.jumlah.balasan = balasan_json.data[0].jumlah_balasan;
-			}
-			if (suka_json.data[0] == null) {
-				item.meta.jumlah.suka = 0;
-			} else {
-				item.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-			}
+			let meta = await fetch(configuration.host + '/meta/meta/komentar/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {
 			break;
 			res.status(500).json({status: false, message: 'Ambil meta komentar gagal.', err: err});
 		}
 	}
 	res.status(200).json({status: true, message: 'Ambil komentar berhasil.', data: komentars});
+}
+
+async function getMetaForKomentar(req, komentar, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	try {
+		let meta = await fetch(configuration.host + '/meta/meta/artikel/' + komentar._id, options);
+		let meta_json = await meta.json();
+		komentar.meta = Object.assign(komentar.meta, meta_json.data);
+		res.status(200).json({status: true, message: 'Ambil komentar berhasil.', data: komentar});
+	} catch (err) {
+		console.log(err)
+		res.status(500).json({status: false, message: 'Ambil meta komentar gagal.', err: err});
+	}
 }
 
 function KomentarControllers() {
@@ -105,7 +99,7 @@ function KomentarControllers() {
 					} else if (post.komentar == null || post.komentar == 0) {
 						res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
 					} else {
-						getMetaForKomentars(post.komentar, res);
+						getMetaForKomentars(req, post.komentar, res);
 					}
 				});
 		}
@@ -147,7 +141,7 @@ function KomentarControllers() {
 					} else if (tanya.komentar == null || tanya.komentar == 0) {
 						res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
 					} else {
-						getMetaForKomentars(tanya.komentar, res);
+						getMetaForKomentars(req, tanya.komentar, res);
 					}
 				});
 		}
@@ -189,7 +183,7 @@ function KomentarControllers() {
 					} else if (topik.komentar == null || topik.komentar == 0) {
 						res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
 					} else {
-						getMetaForKomentars(topik.komentar, res);
+						getMetaForKomentars(req, topik.komentar, res);
 					}
 				});
 		}
@@ -327,7 +321,7 @@ function KomentarControllers() {
 					} else if (komentar == null || komentar == 0) {
 						res.status(204).json({status: false, message: 'Komentar tidak ditemukan.'});
 					} else {
-						getMetaForKomentar(komentar, res);
+						getMetaForKomentar(req, komentar, res);
 					}
 				});
 		}

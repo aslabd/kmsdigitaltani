@@ -19,6 +19,9 @@ var Post = new Schema({
         jumlah: {
             komentar: { type: Number, default: null },
             suka: { type: Number, default: null }
+        },
+        saya: {
+            suka: { type: Boolean, default: null }
         }
     },
     penulis: { type: Schema.Types.ObjectId, required: true },					

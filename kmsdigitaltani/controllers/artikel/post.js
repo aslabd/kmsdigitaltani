@@ -18,53 +18,48 @@ var Post = connection.model('Post', PostSchema);
 
 // deklarasi fungsi lain yang sering digunakan
 // Fungsi untuk mengambil meta artikel
-async function getMetaForPost(post, res) {
-	try {
-		let suka = await fetch(configuration.host + '/tanggapan/suka/artikel/' + post._id + '/jumlah');
-		let komentar = await fetch(configuration.host + '/tanggapan/komentar/artikel/' + post._id + '/jumlah');
-		
-		let suka_json = await suka.json();
-		let komentar_json = await komentar.json();
-		if (suka_json.data[0] == null) {
-			post.meta.jumlah.suka = 0;
-		} else {
-			post.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-		}
-		if (komentar_json.data[0] == null) {
-			post.meta.jumlah.komentar = 0;
-		} else {
-			post.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-		}
-		res.status(200).json({status: true, message: 'Ambil suatu artikel berhasil.', data: post});
-	} catch (err) {
-		res.status(500).json({status: false, message: 'Ambil meta artikel gagal.', err: err});
-	}
-}
+async function getMetaForPosts(req, posts, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
 
-async function getMetaForPosts(posts, res) {
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
 	for (let item of posts) {
 		try {
-			let suka = await fetch(configuration.host + '/tanggapan/suka/artikel/' + item._id + '/jumlah');
-			let komentar = await fetch(configuration.host + '/tanggapan/komentar/artikel/' + item._id + '/jumlah');
-			
-			let suka_json = await suka.json();
-			let komentar_json = await komentar.json();
-			if (komentar_json.data[0] == null) {
-				item.meta.jumlah.komentar = 0;
-			} else {
-				item.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-			}
-			if (suka_json.data[0] == null) {
-				item.meta.jumlah.suka = 0;
-			} else {
-				item.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-			}
+			let meta = await fetch(configuration.host + '/meta/meta/artikel/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {
 			break;
 			res.status(500).json({status: false, message: 'Ambil meta artikel gagal.', err: err});
 		}
 	}
 	res.status(200).json({status: true, message: 'Ambil artikel berhasil.', data: posts});
+}
+
+async function getMetaForPost(req, post, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	try {
+		let meta = await fetch(configuration.host + '/meta/meta/artikel/' + post._id, options);
+		let meta_json = await meta.json();
+		post.meta = Object.assign(post.meta, meta_json.data);
+		res.status(200).json({status: true, message: 'Ambil artikel berhasil.', data: post});
+	} catch (err) {
+		console.log(err)
+		res.status(500).json({status: false, message: 'Ambil meta artikel gagal.', err: err});
+	}
 }
 
 let getTeksFromHTML = function(html) {
@@ -98,7 +93,7 @@ function PostControllers() {
 			Post
 				.find()
 				.where('status').equals('terbit')
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -114,7 +109,7 @@ function PostControllers() {
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
-						getMetaForPosts(post, res);
+						getMetaForPosts(req, post, res);
 					}
 				});
 		}
@@ -149,7 +144,7 @@ function PostControllers() {
 					}
 				})
 				.where('status').equals('terbit')
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -165,7 +160,7 @@ function PostControllers() {
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
-						getMetaForPosts(post, res);
+						getMetaForPosts(req, post, res);
 					}
 				});
 		}
@@ -199,7 +194,7 @@ function PostControllers() {
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').in(['terbit', 'draft'])
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -215,7 +210,7 @@ function PostControllers() {
 						} else if (post == null || post == 0) {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 						} else {
-							getMetaForPosts(post, res);
+							getMetaForPosts(req, post, res);
 						}
 					});
 			} else {
@@ -223,7 +218,7 @@ function PostControllers() {
 					.find()
 					.where('penulis').equals(penulis)
 					.where('status').equals(status)
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.skip(skip)
 					.limit(limit)
 					.select({
@@ -239,7 +234,7 @@ function PostControllers() {
 						} else if (post == null || post == 0) {
 							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 						} else {
-							getMetaForPosts(post, res);
+							getMetaForPosts(req, post, res);
 						}
 					});
 			}
@@ -307,7 +302,7 @@ function PostControllers() {
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
-						getMetaForPosts(post, res);
+						getMetaForPosts(req, post, res);
 					}
 				});
 		}
@@ -326,14 +321,14 @@ function PostControllers() {
 					suka: 0,
 					komentar: 0
 				})
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil artikel gagal.', err: err});
 					} else if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
 					} else {
-						getMetaForPost(post, res);
+						getMetaForPost(req, post, res);
 					}
 				})
 		}

@@ -27,6 +27,7 @@ var komentar = require('./routes/tanggapan/komentar');
 var balasan = require('./routes/tanggapan/balasan');
 var suka = require('./routes/tanggapan/suka');
 var user = require('./routes/user/user');
+var meta = require('./routes/meta/meta');
 
 // Panggil express
 var app = express();
@@ -66,6 +67,8 @@ app.use('/api/tanggapan/suka', suka);
 app.use('/api/tanggapan/suka/*', suka);
 app.use('/api/user', user);
 app.use('/api/user/*', user);
+app.use('/api/meta/meta', meta);
+app.use('/api/meta/meta/*', meta);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -20,49 +20,22 @@ var Topik = connection.model('Topik', TopikSchema);
 var File = connection.model('File', FileSchema);
 
 // Fungsi untuk mengambil meta materi
-async function getMetaForTopik(topik, res) {
-	try {
-		let suka = await fetch(configuration.host + '/tanggapan/suka/materi/' + topik._id + '/jumlah');
-		let komentar = await fetch(configuration.host + '/tanggapan/komentar/materi/' + topik._id + '/jumlah');
-		let suka_json = await suka.json();
-		let komentar_json = await komentar.json();
-		if (suka_json.data[0] == null) {
-			topik.meta.jumlah.suka = 0;
-		} else {
-			topik.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-		}
-		if (komentar_json.data[0] == null) {
-			topik.meta.jumlah.komentar = 0;
-		} else {
-			topik.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-		}
-		res.status(200).json({status: true, message: 'Ambil suatu materi berhasil.', data: topik});
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({status: false, message: 'Ambil meta materi gagal.', err: err});
-	}
-}
+async function getMetaForTopiks(req, topiks, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
 
-async function getMetaForTopiks(topiks, res) {
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
 	for (let item of topiks) {
 		try {
-			let suka = await fetch(configuration.host + '/tanggapan/suka/materi/' + item._id + '/jumlah');
-			let komentar = await fetch(configuration.host + '/tanggapan/komentar/materi/' + item._id + '/jumlah');
-			
-			let suka_json = await suka.json();
-			let komentar_json = await komentar.json();
-			if (komentar_json.data[0] == null) {
-				item.meta.jumlah.komentar = 0;
-			} else {
-				item.meta.jumlah.komentar = komentar_json.data[0].jumlah_komentar;
-			}
-			if (suka_json.data[0] == null) {
-				item.meta.jumlah.suka = 0;
-			} else {
-				item.meta.jumlah.suka = suka_json.data[0].jumlah_suka;
-			}
+			let meta = await fetch(configuration.host + '/meta/meta/materi/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {
-			console.log(err);
 			break;
 			res.status(500).json({status: false, message: 'Ambil meta materi gagal.', err: err});
 		}
@@ -70,6 +43,28 @@ async function getMetaForTopiks(topiks, res) {
 	res.status(200).json({status: true, message: 'Ambil materi berhasil.', data: topiks});
 }
 
+async function getMetaForTopik(req, topik, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	try {
+		let meta = await fetch(configuration.host + '/meta/meta/materi/' + topik._id, options);
+		let meta_json = await meta.json();
+		topik.meta = Object.assign(topik.meta, meta_json.data);
+		res.status(200).json({status: true, message: 'Ambil materi berhasil.', data: topik});
+	} catch (err) {
+		console.log(err)
+		res.status(500).json({status: false, message: 'Ambil meta materi gagal.', err: err});
+	}
+}
+
+// fungsi controller Materi
 function TopikControllers() {
 	this.getAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
@@ -88,7 +83,7 @@ function TopikControllers() {
 		Topik
 			.find()
 			.where('status').equals('terbit')
-			.populate('subkategori')
+			.populate('subkategori', 'nama')
 			.select({
 				suka: 0,
 				materi: 0,
@@ -101,7 +96,7 @@ function TopikControllers() {
 				} else if (topik == null || topik == 0) {
 					res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 				} else {
-					getMetaForTopiks(topik, res);
+					getMetaForTopiks(req, topik, res);
 				}
 			})
 	}
@@ -137,7 +132,7 @@ function TopikControllers() {
 					.limit(limit)
 					.where('penulis').equals(penulis)
 					.where('status').in(['terbit', 'draft'])
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.select({
 						suka: 0,
 						materi: 0,
@@ -150,7 +145,7 @@ function TopikControllers() {
 						} else if (topik == null || topik == 0) {
 							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 						} else {
-							getMetaForTopiks(topik, res);
+							getMetaForTopiks(req, topik, res);
 						}
 					});
 			} else {
@@ -160,7 +155,7 @@ function TopikControllers() {
 					.limit(limit)
 					.where('penulis').equals(penulis)
 					.where('status').equals(status)
-					.populate('subkategori')
+					.populate('subkategori', 'nama')
 					.select({
 						suka: 0,
 						materi: 0,
@@ -173,7 +168,7 @@ function TopikControllers() {
 						} else if (topik == null || topik == 0) {
 							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 						} else {
-							getMetaForTopiks(topik, res);
+							getMetaForTopiks(req, topik, res);
 						}
 					})
 			}
@@ -209,7 +204,7 @@ function TopikControllers() {
 					}
 				})
 				.where('status').equals('terbit')
-				.populate('subkategori')
+				.populate('subkategori', 'nama')
 				.skip(skip)
 				.limit(limit)
 				.select({
@@ -224,7 +219,7 @@ function TopikControllers() {
 					} else if (topik == null || topik == 0) {
 						res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 					} else {
-						getMetaForTopiks(topik, res);
+						getMetaForTopiks(req, topik, res);
 					}
 				});
 		}
@@ -294,7 +289,7 @@ function TopikControllers() {
 					} else if (topik == null || topik == 0) {
 						res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 					} else {
-						getMetaForTopiks(topik, res);
+						getMetaForTopiks(req, topik, res);
 					}
 				});
 		}
@@ -306,14 +301,14 @@ function TopikControllers() {
 		Topik
 			.findById(id)
 			.populate('materi')
-			.populate('subkategori')
+			.populate('subkategori', 'nama')
 			.exec(function(err, topik) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
 				} else if (topik == null || topik == 0) {
 					res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 				} else {
-					getMetaForTopik(topik, res);
+					getMetaForTopik(req, topik, res);
 				}
 			})
 	}
@@ -332,26 +327,6 @@ function TopikControllers() {
 			let deskripsi = req.body.deskripsi;
 			let status = req.body.status;
 			let materi = req.body.materi;
-			// if (meta.thumbnail == null || meta.thumbnail == 0) {
-			// 	if (materi == null || materi == 0) {
-			// 		meta.thumbnail = null;
-			// 	} else {
-			// 		File
-			// 			.findById(materi[0])
-			// 			.then(function(file) {
-			// 				if (file == null || file == 0) {
-			// 					console.log("wow")
-			// 					meta.thumbnail = null;
-			// 				} else {
-			// 					console.log("wiw")
-			// 					meta.thumbnail = file.meta.thumbnail;
-			// 				}
-			// 			})
-			// 			.catch(function(err) {
-			// 				res.status(500).json({status: false, message: 'Ambil file gagal.', err: err});
-			// 			})
-			// 	}
-			// }
 			let tag = req.body.tag;
 			let subkategori = req.body.subkategori;
 
@@ -373,10 +348,10 @@ function TopikControllers() {
 						subkategori: subkategori
 					})
 					.then(function(topik) {
-						res.status(200).json({status: true, message: 'Topik baru berhasil dibuat.', data: topik});
+						res.status(200).json({status: true, message: 'Materi baru berhasil dibuat.', data: topik});
 					})
 					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Topik baru gagal dibuat.', err: err});
+						res.status(500).json({status: false, message: 'Materi baru gagal dibuat.', err: err});
 					});
 			}
 		}

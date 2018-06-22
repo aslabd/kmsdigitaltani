@@ -21,7 +21,7 @@ function SukaControllers() {
 	this.isSayaSukaPost = function(req, res) {
 		let id_post = mongoose.Types.ObjectId(req.params.id_post);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = decoded._id;
+		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		Post
 			.aggregate([{
@@ -32,22 +32,18 @@ function SukaControllers() {
 					as: 'suka'
 				}
 			}, {
-				$project: {
-					suka: {
-						$and: [{
-							$match: {
-								_id: id_post,
-								'suka.penyuka': penyuka
-							}
-						}]
-					}
+				$match: {
+					_id: id_post,
+					'suka.penyuka': penyuka
 				}
 			}])
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu artikel gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu artikel berhasil.', data: false});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu artikel berhasil.', data: suka})
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu artikel berhasil.', data: true});
 				}
 			});
 	}
@@ -55,7 +51,7 @@ function SukaControllers() {
 	this.isSayaSukaTanya = function(req, res) {
 		let id_tanya = mongoose.Types.ObjectId(req.params.id_tanya);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = decoded._id;
+		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		Tanya
 			.aggregate([{
@@ -74,8 +70,10 @@ function SukaControllers() {
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu pertanyaan gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu pertanyaan berhasil.', data: false});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu pertanyaan berhasil.', data: suka})
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu pertanyaan berhasil.', data: true})
 				}
 			});
 	}
@@ -83,7 +81,7 @@ function SukaControllers() {
 	this.isSayaSukaTopik = function(req, res) {
 		let id_topik = mongoose.Types.ObjectId(req.params.id_topik);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = decoded._id;
+		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		Topik
 			.aggregate([{
@@ -102,8 +100,10 @@ function SukaControllers() {
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu materi gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu materi berhasil.', data: false});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu materi berhasil.', data: suka})
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu materi berhasil.', data: true})
 				}
 			});
 	}
@@ -111,7 +111,7 @@ function SukaControllers() {
 	this.isSayaSukaKomentar = function(req, res) {
 		let id_komentar = mongoose.Types.ObjectId(req.params.id_komentar);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = decoded._id;
+		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		Komentar
 			.aggregate([{
@@ -130,8 +130,10 @@ function SukaControllers() {
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu komentar gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu komentar berhasil.', data: false});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu komentar berhasil.', data: suka})
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu komentar berhasil.', data: true})
 				}
 			});
 	}
@@ -139,7 +141,7 @@ function SukaControllers() {
 	this.isSayaSukaBalasan = function(req, res) {
 		let id_balasan = mongoose.Types.ObjectId(req.params.id_balasan);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = decoded._id;
+		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		Balasan
 			.aggregate([{
@@ -158,8 +160,10 @@ function SukaControllers() {
 			.exec(function(err, suka) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil flag saya suka di suatu balasan gagal.', err: err});
+				} else if (suka == null || suka == 0) {
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu balasan berhasil.', data: false});
 				} else {
-					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu balasan berhasil.', data: suka})
+					res.status(200).json({status: true, message: 'Ambil flag saya suka di suatu balasan berhasil.', data: true})
 				}
 			});
 	}

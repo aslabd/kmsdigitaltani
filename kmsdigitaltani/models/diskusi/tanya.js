@@ -20,6 +20,9 @@ module.exports = new Schema({
         jumlah: {
             suka: { type: Number, default: null },
             komentar: { type: Number, default: null }
+        },
+        saya: {
+            suka: { type: Boolean, default: null }
         }
     },
     penulis: { type: Schema.Types.ObjectId, required: true },					

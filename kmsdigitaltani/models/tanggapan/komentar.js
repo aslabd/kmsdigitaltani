@@ -19,6 +19,9 @@ module.exports = new Schema({
     	jumlah: {
             balasan: { type: Number, default: 0 },
             suka: { type: Number, default: 0 }
+        },
+        saya: {
+            suka: { type: Boolean, default: null }
         }
     },
     jenis: { type: String, enum: ['artikel', 'diskusi', 'materi'] },

@@ -7,10 +7,17 @@
 var app = require('../app');
 var debug = require('debug')('kms:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
  */
+
+var credentials = {
+    key: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/fullchain.pem')
+}
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
@@ -19,7 +26,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(credentials, app);
 
 /**
  * Listen on provided port, on all network interfaces.

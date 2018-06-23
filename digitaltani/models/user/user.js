@@ -6,11 +6,13 @@ module.exports = new Schema({
 	username: { type: String, required: true },
 	email: {
 		address: { type: String, required: true },
-		status: { type: Boolean, default: false }
+		status: { type: Boolean, default: false },
+		otp_token: { type: Number, default: null }
 	},
 	telepon: {
 		nomor: { type: String, default: null },
-		status: { type: Boolean, default: false }
+		status: { type: Boolean, default: false },
+		otp_token: { type: Number, default: null }
 	},
 	password: { type: String, required: true },
 	lupa: {

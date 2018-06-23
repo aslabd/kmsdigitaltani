@@ -11,7 +11,7 @@ var UserSchema = require('./../../models/user/user');
 var User = connection.model('User', UserSchema);
 
 // definisikan fungsi untuk membuat token sebagai async/await
-async function createToken(user, login_type, remember_me) {
+async function createToken(user, login_type, remember_me, res) {
 	try {
 		let kadaluarsa;
 
@@ -31,7 +31,7 @@ async function createToken(user, login_type, remember_me) {
 			expiresIn: kadaluarsa
 		})
 
-		res.status(200).json({status: true, message: 'Token berhasil dibuat.', token: token});
+		res.status(200).json({status: true, message: 'Otorisasi berhasil.', data: user, token: token});
 	} catch (err) {
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
 	}
@@ -165,7 +165,8 @@ function UserControllers() {
       			.findOne()
       			.where('username').equals(username)
       			.where('password').equals(password)
-      			select({
+      			.where('status').equals(true)
+      			.select({
 					username: 1,
 					'email.address': 1,
 					nama: 1,
@@ -179,22 +180,27 @@ function UserControllers() {
             			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Login gagal. Username atau password salah.'});
           			} else {
           				// panggil fungsi membuat token
-          				createToken(user, login_type, remember_me);
+          				createToken(user, login_type, remember_me, res);
           			}
           		});
        	}
 	}
 
 	this.auth = function(req, res) {
-		let token = req.body.token;
+		let authorization = req.headers.authorization;
+		if (authorization == null) {
+			res.status(401).json({status: false, message: 'Otentikasi gagal. Silahkan login.'});
+		} else {
+			let token = authorization.split(' ')[1];
 
-		jwt.verify(token, secret, function(err, decoded) {
-			if (err) {
-				res.status(401).json({status: false, message: 'Otentikasi gagal. Silahkan login kembali.', err: err});
-			} else {
-				res.status(200).json({status: true, message: 'Pengguna berhasil diotorisasi.', data: decoded});
-			}
-		});
+			jwt.verify(token, secret, function(err, decoded) {
+				if (err) {
+					res.status(401).json({status: false, message: 'Token gagal diotentikasi. Silahkan login kembali.', err: err});
+				} else {
+					createToken(decoded.user, decoded.login_type, decoded.remember_me, res);
+				}
+			});
+		}
 	}
 }
 

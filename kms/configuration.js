@@ -1,5 +1,5 @@
 module.exports = {
-	host: 'http://abdurrohim.id:3000/api',
+	host: 'https://abdurrohim.id:3000/api',
 	database: {
 		kms: {
 			uri: 'mongodb://abdurrohim.id:27017/kms',

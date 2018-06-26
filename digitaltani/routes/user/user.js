@@ -8,6 +8,14 @@ router.get('/:id', function(req, res) {
 	user.get(req, res);
 });
 
+router.post('/login', function(req, res) {
+	user.login(req, res);
+});
+
+router.post('/auth', function(req, res) {
+	user.auth(req, res);
+});
+
 router.post('/tambah', function(req, res) {
 	user.add(req, res);
 });

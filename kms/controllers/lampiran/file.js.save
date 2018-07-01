@@ -185,7 +185,8 @@ function FileControllers() {
 					if (err.code == 'LIMIT_FILE_SIZE') {
 						res.status(400).json({status: false, message: 'File berukuran melebihi yang diizinkan.', err: err});
 					} else {
-						res.status(500).json({status: false, message: 'File gagal diunggah.', err: err});
+						console.log(err);
+						son({status: false, message: 'File gagal diunggah.', err: err});
 					}
 				} else if (req.file == null || req.file == 0) {
 					res.status(400).json({status: false, message: 'File kosong.'});

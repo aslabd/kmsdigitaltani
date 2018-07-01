@@ -1,5 +1,7 @@
+var fs = require('fs');
+
 module.exports = {
-	host: 'http://abdurrohim.id:3000/api',
+	host: 'https://abdurrohim.id:3000/api',
 	database: {
 		digitaltani: {
 			uri: 'mongodb://abdurrohim.id:27017/digitaltani',
@@ -16,10 +18,19 @@ module.exports = {
 		}
 	},
 	jwt: {
-		secret: 'digitaltaniipb2018'
+		// secret: 'enakmantepportal'
+		secret: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem')
 	},
-	mail: {
-		address: 'aslamabdurrohim@gmail.com',
-		password: 'apaandahyaihkamutuhjahatbangetsih'
-	}
+	email: {
+		address: 'portalharga.ipb@gmail.com',
+		password: 'portalharga1234'
+	},
+	// role: {
+	// 	1: 'admin',
+	// 	2: 'pemerintah',
+	// 	3: 'penyuluh',
+	// 	4: 'petani',
+	// 	5: 'masyarakat',
+	// 	6: 'pedagang'
+	// }
 }

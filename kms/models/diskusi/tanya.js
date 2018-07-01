@@ -27,7 +27,7 @@ var Tanya = new Schema({
     },
     penulis: { type: Schema.Types.ObjectId, required: true },					
     tanggal: {
-        terbit: { type: Date, default: Date.now }, 
+        terbit: { type: Date, default: null }, 
         ubah: { type: Date, default: Date.now } ,
         hapus: { type: Date, default: null }
     },

@@ -2,12 +2,19 @@
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var crypto = require('crypto');
-var secret = require('./../../configuration').jwt.secret;
 
+// ambil file lain yang dibutuhkan
+var authorization = require('./../../auth');
+var configuration = require('./../../configuration');
+var mail = require('./../mail/mail');
+
+// koneksi ke database
 var connection = require('./../../connection');
 
+// skema yang dibutuhkna
 var UserSchema = require('./../../models/user/user');
 
+// sinkronisasi dengan collection di database
 var User = connection.model('User', UserSchema);
 
 // definisikan fungsi untuk membuat token sebagai async/await
@@ -19,21 +26,47 @@ async function createToken(user, login_type, remember_me, res) {
 			// jika remember_me true, maka kadaluarsa 30 hari
 			kadaluarsa = 30 * 24 * 60 * 60;
 		} else {
-			// jika remember_me false, maka kadaluarsa 1 jam
-			kadaluarsa = 60 * 60
+			// jika remember_me false, maka kadaluarsa 0.5 jam
+			kadaluarsa = 30 * 60
 		}
 
 		let token = await jwt.sign({
 			user: user,
 			login_type: login_type,
 			remember_me: remember_me,
-		}, secret ,{
+		}, configuration.jwt.secret ,{
 			expiresIn: kadaluarsa
 		})
 
-		res.status(200).json({status: true, message: 'Otorisasi berhasil.', data: user, token: token});
+		res.status(200).json({status: true, message: 'Otorisasi berhasil.', user: user, token: token});
 	} catch (err) {
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
+	}
+}
+
+function generateRandomString() {
+	let random = '';
+	let karakter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 10; i++) {
+		random += karakter.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return random;
+}
+
+// definisikan fungsi untuk membuat token sebagai async/await
+async function createTokenForVerify(user, secret, res) {
+	try {
+		let kadaluarsa = 30 * 60
+
+		let token = await jwt.sign({
+			user: user
+		}, secret ,{
+			expiresIn: kadaluarsa
+		})
+		
+		return token;
+	} catch (err) {
+		return new Error(err);
 	}
 }
 
@@ -45,64 +78,165 @@ var hashPassword = function(password) {
 function UserControllers() {
 	// Ambil semua user
 	this.getAll = function(req, res) {
-		let auth = true;
+		let auth = authorization.verify(req);
 
-		if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi dan otorisasi gagal.'});
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+		let status = option.status;
+
+		let sort = JSON.parse(req.params.sort);
+		if (sort = 'z-a') {
+			sort = '-nama'
 		} else {
-			let option = JSON.parse(req.params.option);
-			let skip = Number(option.skip);
-			let limit = Number(option.limit);
-			let status = option.status;
-			let role = option.role;
+			sort = 'nama'
+		}
 
-			if (!(skip && limit)) {
-				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-			} else {
-				User
-					.find()
-					.where('status').equals(status)
-					.select({
-						password: 0
-					})
-					.skip(skip)
-					.limit(limit)
-					.exec(function(err, user) {
-						if (err) {
-							res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
-						} else if (!user || user == 0) {
-							res.status(204).json({status: false, message: 'User tidak ditemukan.'});
-						} else {
-							res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user});
-						}
-					});
-			}
+		if (skip == null || limit == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false) {
+			User
+				.find()
+				.where('status').equals(status)
+				.select({
+					username: 1,
+					'email.address': 1,
+					nama: 1,
+					role: 1,
+					foto: 1
+				})
+				.skip(skip)
+				.limit(limit)
+				.sort(sort)
+				.exec(function(err, user) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
+					} else if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'User tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user});
+					}
+				});
+		} else {
+			User
+				.find()
+				.where('status').equals(status)
+				.select({
+					password: 0
+				})
+				.skip(skip)
+				.limit(limit)
+				.sort(sort )
+				.exec(function(err, user) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
+					} else if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'User tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user});
+					}
+				});
+		}
+	}
+
+	// Ambil semua user
+	this.getAllByRole = function(req, res) {
+		let auth = authorization.verify(req);
+
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+		let status = option.status;
+		let role = option.role;
+
+		if (skip == null || limit == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth) {
+			User
+				.find()
+				.where('status').equals(status)
+				.select({
+					password: 0
+				})
+				.skip(skip)
+				.limit(limit)
+				.exec(function(err, user) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
+					} else if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'User tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user});
+					}
+				});
+		} else {
+			User
+				.find()
+				.where('status').equals(status)
+				.where('role').equals(role)
+				.select({
+					username: 1,
+					'email.address': 1,
+					nama: 1,
+					role: 1,
+					foto: 1
+				})
+				.skip(skip)
+				.limit(limit)
+				.exec(function(err, user) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
+					} else if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'User tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user});
+					}
+				});
 		}
 	}
 
 	this.get = function(req, res) {
 		let id = req.params.id;
 
-		let auth = true;
-		User
-			.findById(id)
-			.select({
-				username: 1,
-				'email.address': 1,
-				nama: 1,
-				role: 1,
-				foto: 1
-			})
-			.then(function(user) {
-				if (!user || user == 0) {
-					res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
-				} else {
-					res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
-				}
-			})
-			.catch(function(err) {
-				res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
-			})
+		let auth = authorization.verify(req);
+
+		if (auth) {
+			User
+				.findById(id)
+				.select({
+					password: 0
+				})
+				.then(function(user) {
+					if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
+				})
+		} else {
+			User
+				.findById(id)
+				.select({
+					username: 1,
+					'email.address': 1,
+					nama: 1,
+					role: 1,
+					foto: 1
+				})
+				.then(function(user) {
+					if (user == null || user == 0) {
+						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
+				})
+			}
 	}
 
 	// Tambah user
@@ -138,7 +272,14 @@ function UserControllers() {
 								role: role
 							})
 							.then(function(user) {
-								res.status(200).json({status: true, message: 'Tambah user baru berhasil.'});
+								(async () => {
+									try {
+										await mail.getVerifyEmail(user, token)
+										res.status(200).json({status: true, message: 'Tambah user baru berhasil.'});
+									} catch (err) {
+										res.status(500).json({status: false, message: 'Gagal kirim email.', err: err});
+									}
+								})
 							})
 							.catch(function(err) {
 								res.status(500).json({status: false, message: 'Tambah user baru gagal.', err: err});
@@ -148,6 +289,22 @@ function UserControllers() {
 					}
 				});
 		}
+	}
+
+	this.updateNomorTelepon = function(req, res) {
+		
+	}
+
+	this.updateAddressEmail = function(req, res) {
+
+	}
+
+	this.updateUsername = function(req, res) {
+
+	}
+
+	this.updateFoto = function(req, res) {
+
 	}
 
 	this.login = function(req, res) {
@@ -177,7 +334,7 @@ function UserControllers() {
       				if (err) {
       					res.status(500).json({status: false, message: 'Pengguna gagal ditemukan.', err: err})
       				} else if (!user && user == 0) {
-            			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Login gagal. Username atau password salah.'});
+            			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
           			} else {
           				// panggil fungsi membuat token
           				createToken(user, login_type, remember_me, res);
@@ -187,19 +344,61 @@ function UserControllers() {
 	}
 
 	this.auth = function(req, res) {
-		let authorization = req.headers.authorization;
-		if (authorization == null) {
+		if (req.headers.authorization == null) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal. Silahkan login.'});
 		} else {
-			let token = authorization.split(' ')[1];
+			let token = req.headers.authorization.split(' ')[1];
 
-			jwt.verify(token, secret, function(err, decoded) {
+			jwt.verify(token, configuration.jwt.secret, function(err, decoded) {
 				if (err) {
 					res.status(401).json({status: false, message: 'Token gagal diotentikasi. Silahkan login kembali.', err: err});
 				} else {
 					createToken(decoded.user, decoded.login_type, decoded.remember_me, res);
 				}
 			});
+		}
+	}
+
+	this.getLupaPassword = function(req, res) {
+		let email = req.body.email;
+
+		if (username == null && email == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			User
+				.findOne()
+				.where('email.address').equals(email)
+				.where('status').equals(true)
+				.exec(function(err, user) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
+					} else if (user == null || user == 0) {
+						res.status(204).json({status: false, message:, 'Pengguna tidak ditemukan.'});
+					} else {
+						let token = createToken(req, res);
+
+						User
+							.findByIdAndUpdate(user._id, {
+								'lupa.status': true,
+								'lupa.tanggal': Date.now(),
+								'lupa.token': token 
+							})
+							.then(function(user) {
+								(async () => {
+									try {
+										await mail.getLupaPassword(user, token);
+										res.status(200).json({status: true, message: 'Permintaan ganti presiden berhasil. Silahkan cek email Anda.'});
+									} catch (err) {
+										res.status(500).json({status: false, message: 'Gagal mengirim email.', err: err});
+									}
+								})
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Ubah status pengguna gagal.', err: err});
+							})
+					}
+				})
+
 		}
 	}
 }

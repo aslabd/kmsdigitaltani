@@ -12,16 +12,24 @@ router.get('/all/:option/:sort', function(req, res) {
 	post.getAll(req, res);
 });
 
-router.get('/cari/:option/:sort/:search', function(req, res) {
-	post.getAllBySearch(req, res);
-});
-
 router.get('/saya/:option/:sort', function(req, res) {
-	post.getAllByPenulis(req, res);
+	post.getAllBySaya(req, res);
 });
 
 router.get('/suka/:option/:sort', function(req, res) {
 	post.getAllBySuka(req, res);
+});
+
+router.get('/cari/all/:option/:sort/:search', function(req, res) {
+	post.getAllBySearchAll(req, res);
+});
+
+router.get('/cari/saya/:option/:sort/:search', function(req, res) {
+	post.getAllBySearchSaya(req, res);
+});
+
+router.get('/cari/suka/:option/:sort/:search', function(req, res) {
+	post.getAllBySearchSuka(req, res);
 });
 
 router.post('/tulis', function(req, res) {

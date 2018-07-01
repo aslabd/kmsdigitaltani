@@ -4,6 +4,10 @@ var router = express.Router();
 var user = require('./../../controllers/user/user');
 
 // Semua route dengan method get (Urutan berpengaruh pada hasil)
+router.get('/all/:option/:sort', function(req, res) {
+	user.getAll(req, res);
+});
+
 router.get('/:id', function(req, res) {
 	user.get(req, res);
 });

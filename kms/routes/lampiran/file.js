@@ -16,7 +16,7 @@ router.get('/all/:option', function(req, res) {
 });
 
 router.get('/saya/:option', function(req, res) {
-	file.getAllByPemilik(req, res);
+	file.getAllBySayaPemilik(req, res);
 });
 
 router.post('/upload', function(req, res) {

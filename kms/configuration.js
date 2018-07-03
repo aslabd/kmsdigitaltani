@@ -1,12 +1,12 @@
 module.exports = {
-	host: 'http://abdurrohim.id:3000/api',
+	host: 'http://localhost:3000/api',
 	database: {
 		kms: {
 			uri: 'mongodb://abdurrohim.id:27017/kms',
 			options: {
 				user: 'kms',
 				pass: 'kms1234',
-				autoIndex: true,
+				autoIndex: false,
 				autoReconnect: true,
 				reconnectTries: Number.MAX_VALUE,
 				reconnectInterval: 500,
@@ -16,6 +16,6 @@ module.exports = {
 		}
 	},
 	url: {
-		digitaltani: 'http://abdurrohim.id:3030/api'
+		digitaltani: 'http://localhost:3030/api'
 	}
 }

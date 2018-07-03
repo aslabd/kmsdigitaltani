@@ -1,7 +1,7 @@
-var connection = ('./../connection')
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+var connection = ('./../connection');
 /*
 Penjelasan role:
 1 = admin
@@ -10,6 +10,7 @@ Penjelasan role:
 4 = petani
 5 = pedagang
 6 = masyarakat
+7 = pakar
 */
 var User = new Schema({
 	username: { type: String, required: true, index: true, unique: true },

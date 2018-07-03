@@ -1,6 +1,5 @@
 // package yang dibutuhkan
 var mongoose = require('mongoose');
-var jwt = require('jsonwebtoken');
 var fetch = require('node-fetch');
 var striptags = require('striptags');
 
@@ -116,7 +115,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySaya = async function(req, res) {
+	this.getAllBySayaPenulis = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -138,10 +137,10 @@ function PostControllers() {
 
 		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false) {
-			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi. Silahkan login.'});
+		} else if (auth == false || auth.status == false || (![2, 3, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let penulis = auth.user._id;
+			let penulis = auth.data._id;
 			
 			if (status != null) {
 				Post
@@ -195,7 +194,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySuka = async function(req, res) {
+	this.getAllBySayaSuka = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -216,10 +215,10 @@ function PostControllers() {
 
 		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false || [1, 2].includes(auth.user.role)) { // role admin dan pemerintah nggak bisa akses fungsi ini
+		} else if (auth == false || auth.status == false || !([3, 4, 5, 6, 7].includes(auth.data.role))) { // role admin dan pemerintah nggak bisa akses fungsi ini
 			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi. Silahkan login.'});
 		} else {
-			let penyuka = mongoose.Types.ObjectId(auth.user._id);
+			let penyuka = mongoose.Types.ObjectId(auth.data._id);
 
 			Post
 				.aggregate([{
@@ -359,7 +358,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySearchSaya = async function(req, res) {
+	this.getAllBySearchSayaPenulis = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -384,12 +383,12 @@ function PostControllers() {
 		let search = req.params.search;
 
 
-		if (skip == null || limit == null || search == null || penulis == null) {
+		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![2, 3, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let penulis = auth.user._id;
+			let penulis = auth.data._id;
 
 			if (status != null) {
 				Post
@@ -451,7 +450,7 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySearchSuka = async function(req, res) {
+	this.getAllBySearchSayaSuka = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -474,10 +473,10 @@ function PostControllers() {
 
 		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let penyuka = mongoose.Types.ObjectId(auth.user._id);
+			let penyuka = mongoose.Types.ObjectId(auth.data._id);
 
 			Post
 				.aggregate([{
@@ -586,10 +585,10 @@ function PostControllers() {
 
 		if (judul == null || isi == null || status == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {
+		} else if (auth == false || auth.status == false || (![2, 3, 7].includes(auth.data.role))) {
 			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let penulis = auth.user._id;
+			let penulis = auth.data._id;
 
 			if (status == 'terbit') {
 				Post
@@ -659,18 +658,18 @@ function PostControllers() {
 
 		if (id == null || judul == null || isi == null || status == null) {		// cek seluruh variabel yang wajib berisi
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
-		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {																	// cek hasil otentikasi dan otorisasi
-			res.status(401).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else if (auth == false || auth.status == false || (![1, 2, 3, 7].includes(auth.data.role))) {																	// cek hasil otentikasi dan otorisasi
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let penulis = auth.user._id;
+			let penulis = auth.data._id;
 
 			Post
 				.findById(id)
 				.then(function(post) {
-					if (post == null || post == 0) {
+					if (post == null || post == 0 || post.status == 'hapus') {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else if ((post.penulis != penulis) && (![1, 2].includes(auth.user.role))) {
-						res.status(403).json({status: false, message: 'Anda bukan pemilik artikel ini atau tidak berhak melakukan ini.'});
+					} else if ((post.penulis != penulis) && (![1].includes(auth.data.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan penulis artikel ini atau tidak berhak melakukan ini.'});
 					} else if ((status != post.status) && (status == 'terbit')) {
 						Post
 							.findByIdAndUpdate(id, {
@@ -728,15 +727,17 @@ function PostControllers() {
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![1, 2, 3, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penulis = auth.data._id;
+
 			Post
 				.findById(id)
 				.then(function(post) {
-					if (post == null || post == 0) {
+					if (post == null || post == 0 || post.status == 'hapus') {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else if ((post.penulis != penulis) && (![1, 2].includes(auth.user.role))) {
+					} else if ((post.penulis != penulis) && (![1].includes(auth.data.role))) {
 						res.status(403).json({status: false, message: 'Anda bukan pemilik artikel ini atau tidak berhak melakukan ini.'});
 					} else {
 						Post

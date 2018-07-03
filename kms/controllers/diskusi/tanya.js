@@ -1,6 +1,5 @@
 // package yang dibutuhkan
 var mongoose = require('mongoose');
-var jwt = require('jsonwebtoken');
 var fetch = require('node-fetch');
 
 // koneksi database yang dibutuhkan
@@ -124,10 +123,13 @@ function TanyaControllers() {
 		}
 	}
 
-	this.getAllBySaya = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.getAllBySayaPenulis = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -141,61 +143,68 @@ function TanyaControllers() {
 			sort = '-tanggal.ubah';
 		}
 
-		if (skip == null || limit == null || penulis == null) {
+		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (status != null) {
-			Tanya
-				.find()
-				.where('penulis').equals(penulis)
-				.where('status').equals(status)
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, tanya) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
-					} else if (tanya == null || tanya == 0) {
-						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
-					} else {
-						getMetaForTanyas(req, tanya, res);
-					}
-				});
+		} else if (auth == false || auth.status == false || (![2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			Tanya
-				.find()
-				.where('penulis').equals(penulis)
-				.where('status').in(['terbit', 'draft'])
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, tanya) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
-					} else if (tanya == null || tanya == 0) {
-						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
-					} else {
-						getMetaForTanyas(req, tanya, res);
-					}
-				});
+			let penulis = auth.data._id;
+
+			if (status != null) {
+				Tanya
+					.find()
+					.where('penulis').equals(penulis)
+					.where('status').equals(status)
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, tanya) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else {
+							getMetaForTanyas(req, tanya, res);
+						}
+					});
+			} else {
+				Tanya
+					.find()
+					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, tanya) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else {
+							getMetaForTanyas(req, tanya, res);
+						}
+					});
+			}
 		}
 	}
 
-	this.getAllBySuka = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = mongoose.Types.ObjectId(decoded._id);
+	this.getAllBySayaSuka = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -208,11 +217,13 @@ function TanyaControllers() {
 			sort = -1;
 		}
 
-		if (skip == null || limit == null || penyuka == null) {
+		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penyuka = mongoose.Types.ObjectId(auth.data._id);
+
 			Tanya
 				.aggregate([{
 					$lookup: {
@@ -372,10 +383,14 @@ function TanyaControllers() {
 		}
 	}
 
-	this.getAllBySearchSaya = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.getAllBySearchSayaPenulis = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+		
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -394,69 +409,76 @@ function TanyaControllers() {
 		let search = req.params.search;
 
 
-		if (skip == null || limit == null || search == null || penulis == null) {
+		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (status != null) {
-			Tanya
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('penulis').equals(penulis)
-				.where('status').equals(status)
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, tanya) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
-					} else if (tanya == null || tanya == 0) {
-						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
-					} else {
-						getMetaForTanyas(req, tanya, res);
-					}
-				});
+		} else if (auth == false || auth.status == false) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			Tanya
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('penulis').equals(penulis)
-				.where('status').in(['terbit', 'draft'])
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, tanya) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
-					} else if (tanya == null || tanya == 0) {
-						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
-					} else {
-						getMetaForTanyas(req, tanya, res);
-					}
-				});
+			let penulis = auth.data._id;
+
+			if (status != null) {
+				Tanya
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('penulis').equals(penulis)
+					.where('status').equals(status)
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, tanya) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else {
+							getMetaForTanyas(req, tanya, res);
+						}
+					});
+			} else {
+				Tanya
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, tanya) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+						} else if (tanya == null || tanya == 0) {
+							res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+						} else {
+							getMetaForTanyas(req, tanya, res);
+						}
+					});
+			}
 		}
 	}
 
-	this.getAllBySearchSuka = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = mongoose.Types.ObjectId(decoded._id);
+	this.getAllBySearchSayaSuka = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -473,9 +495,11 @@ function TanyaControllers() {
 
 		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penyuka = mongoose.Types.ObjectId(auth.data._id);
+
 			Tanya
 				.aggregate([{
 					$match: {
@@ -556,10 +580,13 @@ function TanyaControllers() {
 		}
 	}
 
-	this.add = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.add = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 		
 		let meta = req.body.meta;
 		let judul = req.body.judul;
@@ -569,54 +596,61 @@ function TanyaControllers() {
 		let status = req.body.status;
 		let subkategori = req.body.subkategori;
 
-		if (penulis == null || judul == null || isi == null || status == null || subkategori == null) {
+		if (judul == null || isi == null || status == null || subkategori == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (status == 'terbit') {
-			Tanya
-				.create({
-					meta: meta,
-					penulis: penulis,
-					'tanggal.terbit': Date.now,
-					judul: judul,
-					ringkasan: ringkasan,
-					isi: isi,
-					tag: tag,
-					status: status,
-					subkategori: subkategori
-				})
-				.then(function(tanya) {
-					res.status(200).json({status: true, message: 'Membuat pertanyaan baru berhasil.', data: tanya});
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Membuat pertanyaan baru gagal.', err: err});
-				});
+		} else if (auth == false || auth.status == false || (![2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			Tanya
-				.create({
-					meta: meta,
-					penulis: penulis,
-					judul: judul,
-					ringkasan: ringkasan,
-					isi: isi,
-					tag: tag,
-					status: status,
-					subkategori: subkategori
-				})
-				.then(function(tanya) {
-					res.status(200).json({status: true, message: 'Membuat pertanyaan baru berhasil.', data: tanya});
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Membuat pertanyaan baru gagal.', err: err});
-				});
+			let penulis = auth.data._id;
+
+			if (status == 'terbit') {
+				Tanya
+					.create({
+						meta: meta,
+						penulis: penulis,
+						'tanggal.terbit': Date.now,
+						judul: judul,
+						ringkasan: ringkasan,
+						isi: isi,
+						tag: tag,
+						status: status,
+						subkategori: subkategori
+					})
+					.then(function(tanya) {
+						res.status(200).json({status: true, message: 'Membuat pertanyaan baru berhasil.', data: tanya});
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Membuat pertanyaan baru gagal.', err: err});
+					});
+			} else {
+				Tanya
+					.create({
+						meta: meta,
+						penulis: penulis,
+						judul: judul,
+						ringkasan: ringkasan,
+						isi: isi,
+						tag: tag,
+						status: status,
+						subkategori: subkategori
+					})
+					.then(function(tanya) {
+						res.status(200).json({status: true, message: 'Membuat pertanyaan baru berhasil.', data: tanya});
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Membuat pertanyaan baru gagal.', err: err});
+					});
+			}	
 		}
 	}
 
-	this.update = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.update = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let id = req.body.id;
 		let judul = req.body.judul;
@@ -627,14 +661,18 @@ function TanyaControllers() {
 
 		if (id == null || judul == null || isi == null || status == null || subkategori == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![1, 2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penulis = auth.data._id;
+
 			Tanya
 				.findById(id)
 				.then(function(tanya) {
-					if (tanya == null || tanya == 0) {
+					if (tanya == null || tanya == 0 || tanya.status == 'hapus') {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+					} else if ((tanya.penulis != penulis) && (![1].includes(auth.data.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan pemilik pertanyaan ini atau tidak berhak melakukan ini.'});
 					} else if ((status != tanya.status) && (status == 'terbit')) {
 						Tanya
 							.findByIdAndUpdate(id, {
@@ -676,22 +714,31 @@ function TanyaControllers() {
 		}
 	}
 
-	this.delete = function(req, res) {
-		let auth = true;
+	this.delete = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 		
 		let id = req.body.id;
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || (![1, 2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penulis = auth.data._id;
+			
 			Tanya
 				.findById(id)
 				.select('penulis')
 				.then(function(tanya) {
-					if (tanya == null || tanya == 0) {
+					if (tanya == null || tanya == 0 || tanya.status == 'hapus') {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+					} else if ((tanya.penulis != penulis) && (![1].includes(auth.data.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan penulis artikel ini atau tidak berhak melakukan ini.'});
 					} else {
 						Tanya
 							.findByIdAndUpdate(id, {

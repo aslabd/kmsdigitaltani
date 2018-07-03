@@ -15,7 +15,7 @@ var Suka = connection.model('Suka', SukaSchema);
 var Post = new Schema({
     meta: {
         thumbnail: { type: String, default: null },
-        isi: { type: String, index: true},
+        isi: { type: String},
         jumlah: {
             komentar: { type: Number, default: null },
             suka: { type: Number, default: null }
@@ -39,11 +39,11 @@ var Post = new Schema({
         ubah: { type: Date, default: Date.now },
         hapus: { type: Date, default: null } 
     },
-    judul: { type: String, required: true, index: true },
-    ringkasan: { type: String, required: true, index: true },
+    judul: { type: String, required: true },
+    ringkasan: { type: String, required: true },
     isi: { type: String, required: true },
     subkategori: { type: Schema.Types.ObjectId, ref: 'Subkategori' },
-    tag: [{ type: String, default: null, index: true }],
+    tag: [{ type: String, default: null }],
     status: { type: String, enum: ['terbit', 'draft', 'hapus'], default: 'draft' },
     suka: [{ type: Schema.Types.ObjectId, ref: 'Suka' }],
     komentar: [{ type: Schema.Types.ObjectId, ref: 'Komentar' }]

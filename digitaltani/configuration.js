@@ -1,7 +1,7 @@
 var fs = require('fs');
 
 module.exports = {
-	host: 'http://abdurrohim.id:3030/api',
+	host: 'http://localhost:3030/api',
 	database: {
 		digitaltani: {
 			uri: 'mongodb://abdurrohim.id:27017/digitaltani',

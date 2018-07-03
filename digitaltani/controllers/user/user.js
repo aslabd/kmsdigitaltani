@@ -20,11 +20,11 @@ var UserSchema = require('./../../models/user/user');
 var User = connection.model('User', UserSchema);
 
 // definisikan fungsi untuk membuat token sebagai async/await
-async function createToken(user, login_type, remember_me, res) {
+async function createToken(data, res) {
 	try {
 		let kadaluarsa;
 
-		if (remember_me == true) {
+		if (data.remember_me == true) {
 			// jika remember_me true, maka kadaluarsa 7 hari
 			kadaluarsa = 7 * 24 * 60 * 60;
 		} else {
@@ -32,19 +32,13 @@ async function createToken(user, login_type, remember_me, res) {
 			kadaluarsa = 60 * 60
 		}
 
-		let data = {
-			login_type: login_type,
-			remember_me: remember_me
-		}
-
-		data = Object.assign(user._doc, user);
-
-		let token = await jwt.sign(data, configuration.jwt.secret ,{
+		let token = await jwt.sign(data, configuration.jwt.secret, {
 			expiresIn: kadaluarsa
-		})
+		});
 
-		res.status(200).json({status: true, message: 'Otorisasi berhasil.', user: user, token: token});
+		res.status(200).json({status: true, message: 'Otorisasi berhasil.', data: data, token: token});
 	} catch (err) {
+		console.log(err);
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
 	}
 }
@@ -375,8 +369,15 @@ function UserControllers() {
       				} else if (user == null || user == 0) {
             			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
           			} else {
+          				let data = {
+          					login_type: login_type,
+          					remember_me: remember_me
+          				}
+
+          				data = Object.assign(user._doc, data);
+
           				// panggil fungsi membuat token
-          				createToken(user, login_type, remember_me, res);
+          				createToken(data, res);
           			}
           		});
        	}
@@ -392,7 +393,9 @@ function UserControllers() {
 				if (err) {
 					res.status(401).json({status: false, message: 'Token gagal diotentikasi. Silahkan login kembali.', err: err});
 				} else {
-					createToken(decoded.user, decoded.login_type, decoded.remember_me, res);
+					delete decoded.iat;
+  					delete decoded.exp;
+					createToken(decoded, res);
 				}
 			});
 		}

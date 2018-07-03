@@ -540,10 +540,8 @@ function PostControllers() {
 		}
 	}
 
-	this.add = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.add = async function(req, res) {
+		let auth = Auth.verify(req);
 
 		let meta = req.body.meta;
 		let judul = req.body.judul;
@@ -559,57 +557,57 @@ function PostControllers() {
 		let status = req.body.status;
 		let subkategori = req.body.subkategori;
 
-		console.log(penulis);
-
-		if (penulis == null || judul == null || isi == null || status == null) {
+		if (judul == null || isi == null || status == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (status == 'terbit') {
-			Post
-				.create({
-					meta: meta,
-					penulis: penulis,
-					'tanggal.terbit': Date.now(),
-					judul: judul,
-					ringkasan: ringkasan,
-					isi: isi,
-					tag: tag,
-					status: status,
-					subkategori: subkategori
-				})
-				.then(function(post) {
-					res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Membuat artikel baru gagal.', err: err});
-				});
+		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			Post
-				.create({
-					meta: meta,
-					penulis: penulis,
-					judul: judul,
-					ringkasan: ringkasan,
-					isi: isi,
-					tag: tag,
-					status: status,
-					subkategori: subkategori
-				})
-				.then(function(post) {
-					res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Membuat artikel baru gagal.', err: err});
-				});
+			let penulis = auth.user._id;
+
+			if (status == 'terbit') {
+				Post
+					.create({
+						meta: meta,
+						penulis: penulis,
+						'tanggal.terbit': Date.now(),
+						judul: judul,
+						ringkasan: ringkasan,
+						isi: isi,
+						tag: tag,
+						status: status,
+						subkategori: subkategori
+					})
+					.then(function(post) {
+						res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Membuat artikel baru gagal.', err: err});
+					});
+			} else {
+				Post
+					.create({
+						meta: meta,
+						penulis: penulis,
+						judul: judul,
+						ringkasan: ringkasan,
+						isi: isi,
+						tag: tag,
+						status: status,
+						subkategori: subkategori
+					})
+					.then(function(post) {
+						res.status(200).json({status: true, message: 'Membuat artikel baru berhasil.'});
+					})
+					.catch(function(err) {
+						res.status(500).json({status: false, message: 'Membuat artikel baru gagal.', err: err});
+					});
+			}
 		}
 	}
 
-	this.update = function(req, res) {
+	this.update = async function(req, res) {
 		// seluruh variabel yang diisi berhubungan dengan otentikasi dan otorisasi
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+		let auth = await Auth.verify(req);
 
 		// seluruh variabel yang diisi dari input
 		let id = req.body.id;
@@ -627,16 +625,20 @@ function PostControllers() {
 		let status = req.body.status;
 		let subkategori = req.body.subkategori;
 
-		if (id == null || penulis == null || judul == null || isi == null || status == null) {		// cek seluruh variabel yang wajib berisi
+		if (id == null || judul == null || isi == null || status == null) {		// cek seluruh variabel yang wajib berisi
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
-		} else if (auth == false) {																	// cek hasil otentikasi dan otorisasi
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {																	// cek hasil otentikasi dan otorisasi
+			res.status(401).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penulis = auth.user._id;
+
 			Post
 				.findById(id)
 				.then(function(post) {
 					if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					} else if ((post.penulis != penulis) && (![1, 2].includes(auth.user.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan pemilik artikel ini atau tidak berhak melakukan ini.'});
 					} else if ((status != post.status) && (status == 'terbit')) {
 						Post
 							.findByIdAndUpdate(id, {
@@ -682,14 +684,14 @@ function PostControllers() {
 		}
 	}
 
-	this.delete = function(req, res) {
-		let auth = true;
+	this.delete = async function(req, res) {
+		let auth = await Auth.verify(req);
 		
 		let id = req.body.id;
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
+		} else if (auth == false || auth.status == false || ![1, 2, 3].includes(auth.user.role)) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else {
 			Post
@@ -697,6 +699,8 @@ function PostControllers() {
 				.then(function(post) {
 					if (post == null || post == 0) {
 						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					} else if ((post.penulis != penulis) && (![1, 2].includes(auth.user.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan pemilik artikel ini atau tidak berhak melakukan ini.'});
 					} else {
 						Post
 							.findByIdAndUpdate(id, {

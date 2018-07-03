@@ -14,7 +14,7 @@ var fs = require('fs');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3030');
 app.set('port', port);
 
 /**
@@ -25,7 +25,7 @@ var credentials = {
   cert: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/fullchain.pem')
 }
 
-var server = https.createServer(credentials, app);
+var server = http.createServer(app);
 // var server = https.createServer(credentials, app);
 
 /**

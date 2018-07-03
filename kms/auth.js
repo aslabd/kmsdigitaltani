@@ -14,7 +14,7 @@ function Auth() {
 			}
 
 			try {
-				let auth = await fetch(configuration.host + '/user/auth', options);
+				let auth = await fetch(configuration.url.digitaltani + '/user/auth', options);
 				let hasil = await auth.json();
 
 				if (hasil.status == true) {

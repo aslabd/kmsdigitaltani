@@ -3,16 +3,17 @@ var Schema = mongoose.Schema;
 
 module.exports = new Schema({
    	jumlah: {
-   		artikel: { type: Number, default: null, min: 0 },
-   		diskusi: { type: Number, default: null, min: 0 },
-   		materi: { type: Number, default: null, min: 0 },
+   		artikel: { type: Number, default: null },
+   		diskusi: { type: Number, default: null },
+   		materi: { type: Number, default: null },
    	},
+      pemilik: { type: Schema.Types.ObjectId, required: true },
    	following: [{
-   		user: Schema.Types.ObjectId,
+   		user: { type: Schema.Types.ObjectId, required: true },
    		tanggal: { type: Date, default: Date.now }
    	}],
    	follower: [{
-   		user: Schema.Types.ObjectId,
+   		user: { type: Schema.Types.ObjectId, required: true },
    		tanggal: { type: Date, default: Date.now }
    	}]
 });

@@ -3,6 +3,8 @@ var jwt = require('jsonwebtoken');
 
 var connection = require('./../../connection');
 
+var Auth = require('./../../auth');
+
 var PostSchema = require('./../../models/artikel/post');
 var TanyaSchema = require('./../../models/diskusi/tanya');
 var TopikSchema = require('./../../models/materi/topik');

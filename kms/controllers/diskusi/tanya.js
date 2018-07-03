@@ -258,6 +258,47 @@ function TanyaControllers() {
 		}
 	}
 
+	this.getAllByPenulis = function(req, res) {
+		let penulis = req.params.penulis;
+
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+
+		let sort = req.params.sort;
+		if (sort== 'terlama') {
+			sort = 'tanggal.terbit';
+		} else {
+			sort = '-tanggal.terbit';
+		}
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Tanya
+				.find()
+				.where('penulis').equals(penulis)
+				.where('status').equals('terbit')
+				.populate('subkategori', 'nama')
+				.select({
+					suka: 0,
+					komentar: 0
+				})
+				.skip(skip)
+				.limit(limit)
+				.sort(sort)
+				.exec(function(err, tanya) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Pertanyaan gagal ditemukan.', err: err});
+					} else if (tanya == null || tanya == 0) {
+						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+					} else {
+						getMetaForTanyas(req, tanya, res);
+					}
+				});
+		}
+	}
+
 	this.getAllBySearchAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -299,7 +340,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(req, post, res);
+						getMetaForTanyas(req, tanya, res);
 					}
 				});
 		} else {
@@ -325,7 +366,7 @@ function TanyaControllers() {
 					} else if (tanya == null || tanya == 0) {
 						res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
 					} else {
-						getMetaForTanyas(req, post, res);
+						getMetaForTanyas(req, tanya, res);
 					}
 				});
 		}
@@ -441,6 +482,10 @@ function TanyaControllers() {
 						$text: {
 							$search: search
 						}
+					}
+				}, {
+					$match: {
+						status: 'terbit'
 					}
 				}, {
 					$lookup: {

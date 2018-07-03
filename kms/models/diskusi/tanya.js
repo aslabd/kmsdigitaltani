@@ -23,6 +23,15 @@ var Tanya = new Schema({
         },
         saya: {
             suka: { type: Boolean, default: null }
+        },
+        penulis: {
+            username: { type: String, default: null },
+            foto: { type: String, default: null },
+            nama: { type: String, default: null },
+            email: {
+                address: { type: String, default: null }
+            },
+            role: { type: Number, default: null }
         }
     },
     penulis: { type: Schema.Types.ObjectId, required: true },					

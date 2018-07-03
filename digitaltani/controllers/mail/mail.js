@@ -2,6 +2,41 @@ var nodemailer = require('nodemailer');
 var configuration = require('./../../configuration');
 var template = require('./template');
 
+function generateRandomString() {
+	let random = '';
+	let karakter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 6; i++) {
+		random += karakter.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return random;
+}
+
+function generateRandomNumber() {
+	let random = '';
+	let karakter = '0123456789';
+	for (let i = 0; i < 6; i++) {
+		random += karakter.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return random;
+}
+
+// definisikan fungsi untuk membuat token sebagai async/await
+async function createTokenForVerify(user, secret, res) {
+	try {
+		let kadaluarsa = 30 * 60
+
+		let token = await jwt.sign({
+			user: user
+		}, secret ,{
+			expiresIn: kadaluarsa
+		})
+
+		return token;
+	} catch (err) {
+		return new Error(err);
+	}
+}
+
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,

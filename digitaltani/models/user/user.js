@@ -36,7 +36,7 @@ var User = new Schema({
 		login: { type: Date, default: null },
 	},
 	status: { type: Boolean, default: false },
-	role: { type: Number, min: 1, max: 6, default: 6 },
+	role: { type: Number, required: true },
 	foto: { type: String, default: null },
 	alamat: {
 		lokasi: { type: String, default: null },

@@ -242,6 +242,48 @@ function TopikControllers() {
 		}
 	}
 
+	this.getAllByPenulis = function(req, res) {
+		let penulis = req.params.penulis;
+
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+
+		let sort = req.params.sort;
+		if (sort== 'terlama') {
+			sort = 'tanggal.terbit';
+		} else {
+			sort = '-tanggal.terbit';
+		}
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Topik
+				.find()
+				.where('penulis').equals(penulis)
+				.where('status').equals('terbit')
+				.populate('subkategori', 'nama')
+				.select({
+					suka: 0,
+					komentar: 0,
+					materi: 0
+				})
+				.skip(skip)
+				.limit(limit)
+				.sort(sort)
+				.exec(function(err, topik) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Materi gagal ditemukan.', err: err});
+					} else if (topik == null || topik == 0) {
+						res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
+					} else {
+						getMetaForTopiks(req, topik, res);
+					}
+				});
+		}
+	}
+
 	this.getAllBySearchAll = function(req, res) {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -401,6 +443,10 @@ function TopikControllers() {
 						$text: {
 							$search: search
 						}
+					}
+				}, {
+					$match: {
+						status: 'terbit'
 					}
 				}, {
 					$lookup: {

@@ -24,10 +24,6 @@ router.post('/tambah', function(req, res) {
 	user.add(req, res);
 });
 
-router.patch('/ubah', function(req, res) {
-	user.update(req, res);
-});
-
 router.delete('/hapus', function(req, res) {
 	user.delete(req, res);
 });

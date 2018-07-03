@@ -4,6 +4,8 @@ var jwt = require('jsonwebtoken');
 var fetch = require('node-fetch');
 var striptags = require('striptags');
 
+var Auth = require('./../../auth');
+
 // koneksi database yang dibutuhkan
 var connection = require('./../../connection');
 
@@ -114,10 +116,8 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySaya = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.getAllBySaya = async function(req, res) {
+		let auth = await Auth.verify(req);
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -131,65 +131,67 @@ function PostControllers() {
 			sort = '-tanggal.ubah';
 		}
 
-		if (skip == null || limit == null || penulis == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'})
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi dan otorisasi gagal.'});
-		} else if (status != null) {
-			Post
-				.find()
-				.where('penulis').equals(penulis)
-				.where('status').equals(status)
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
+		if (skip == null || limit == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi. Silahkan login.'});
 		} else {
-			Post
-				.find()
-				.where('penulis').equals(penulis)
-				.where('status').in(['terbit', 'draft'])
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
+			let penulis = auth.user._id;
+			
+			if (status != null) {
+				Post
+					.find()
+					.where('penulis').equals(penulis)
+					.where('status').equals(status)
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			} else {
+				Post
+					.find()
+					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			}
 		}
 	}
 
-	this.getAllBySuka = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = mongoose.Types.ObjectId(decoded._id);
+	this.getAllBySuka = async function(req, res) {
+		let auth = await Auth.verify(req);
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -202,11 +204,13 @@ function PostControllers() {
 			sort = -1;
 		}
 
-		if (skip == null || limit == null || penyuka == null) {
+		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		} else if (auth == false || auth.status == false || [1, 2].includes(auth.user.role)) { // role admin dan pemerintah nggak bisa akses fungsi ini
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi. Silahkan login.'});
 		} else {
+			let penyuka = mongoose.Types.ObjectId(auth.user._id);
+
 			Post
 				.aggregate([{
 					$lookup: {
@@ -242,6 +246,49 @@ function PostControllers() {
 						komentar: 0
 					}
 				}])
+				.exec(function(err, post) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+					} else if (post == null || post == 0) {
+						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					} else {
+						getMetaForPosts(req, post, res);
+					}
+				});
+		}
+	}
+
+	this.getAllByPenulis = function(req, res) {
+		let penulis = req.params.penulis;
+
+		let option = JSON.parse(req.params.option);
+		let skip = Number(option.skip);
+		let limit = Number(option.limit);
+
+		let sort = req.params.sort;
+		if (sort== 'terlama') {
+			sort = 'tanggal.terbit';
+		} else {
+			sort = '-tanggal.terbit';
+		}
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Post
+				.find()
+				.where('penulis').equals(penulis)
+				.where('status').equals('terbit')
+				.populate('subkategori', 'nama')
+				.select({
+					'meta.isi': 0,
+					isi: 0,
+					suka: 0,
+					komentar: 0
+				})
+				.skip(skip)
+				.limit(limit)
+				.sort(sort)
 				.exec(function(err, post) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
@@ -416,6 +463,10 @@ function PostControllers() {
 						$text: {
 							$search: search
 						}
+					}
+				}, {
+					$match: {
+						status: 'terbit'
 					}
 				}, {
 					$lookup: {

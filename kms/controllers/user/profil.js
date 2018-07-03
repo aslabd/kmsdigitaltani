@@ -1,3 +1,7 @@
+var fetch = require('node-fetch');
+
+var Auth = require('./../../auth');
+
 var Profil = require('./../../models/user/profil');
 
 function ProfilControllers() {
@@ -12,8 +16,12 @@ function ProfilControllers() {
 	this.follow = function(req, res) {
 		let auth = true;
 
-		if (auth == false) {
-			res.status(403).json({status: false, message: 'Akses dilarang. Silahkan login kembali.'});
+		let id = req.body.id;
+
+		if (id == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'})
+		} else if (auth == false) {
+			res.status(403).json({status: false, message: 'Sesi gagal. Silahkan login kembali.'});
 		}
 	}
 }

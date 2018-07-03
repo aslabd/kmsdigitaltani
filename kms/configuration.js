@@ -1,5 +1,5 @@
 module.exports = {
-	host: 'https://abdurrohim.id:3000/api',
+	host: 'http://localhost:3000/api',
 	database: {
 		kms: {
 			uri: 'mongodb://abdurrohim.id:27017/kms',
@@ -14,5 +14,8 @@ module.exports = {
 				bufferMaxEntries: 0
 			}
 		}
+	},
+	url: {
+		digitaltani: 'http://localhost:3030/api'
 	}
 }

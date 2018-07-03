@@ -1,4 +1,4 @@
-var jwt = require('jsonwebtoken');
+var Auth = require('./../../auth');
 
 var connection = require('./../../connection');
 
@@ -20,28 +20,33 @@ function KategoriControllers() {
 			sort = 'nama'
 		}
 
-		Kategori
-			.find()
-			.skip(skip)
-			.limit(limit)
-			.populate('subkategori')
-			.sort(sort)
-			.exec(function(err, kategori) {
-				if (err) {
-					res.status(500).json({status: false, message: 'Ambil semua kategori gagal.', err: err});
-				} else if (kategori == null || kategori == 0) {
-					res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
-				} else {
-					res.status(200).json({status: true, message: 'Ambil semua kategori berhasil.', data: kategori});
-				}
-			})
+		if (skip == null || limit == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Kategori
+				.find()
+				.skip(skip)
+				.limit(limit)
+				.populate('subkategori')
+				.sort(sort)
+				.exec(function(err, kategori) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil semua kategori gagal.', err: err});
+					} else if (kategori == null || kategori == 0) {
+						res.status(204).json({status: false, message: 'Kategori tidak ditemukan.'});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil semua kategori berhasil.', data: kategori});
+					}
+				});
+		}
+
 	}
 
 	// Ambil suatu kategori
 	this.get = function(req, res) {
 		let id = req.params.id;
 
-		if (id == null || id == 0) {
+		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Kategori

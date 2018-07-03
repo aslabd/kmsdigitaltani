@@ -18,7 +18,8 @@ module.exports = {
 		}
 	},
 	jwt: {
-		secret: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem')
+		secret: 'enakmantepportal'
+		// secret: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem')
 	},
 	email: {
 		address: 'portalharga.ipb@gmail.com',

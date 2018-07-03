@@ -117,7 +117,12 @@ function PostControllers() {
 	}
 
 	this.getAllBySaya = async function(req, res) {
-		let auth = await Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -191,7 +196,12 @@ function PostControllers() {
 	}
 
 	this.getAllBySuka = async function(req, res) {
-		let auth = await Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -349,10 +359,13 @@ function PostControllers() {
 		}
 	}
 
-	this.getAllBySearchSaya = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penulis = decoded._id;
+	this.getAllBySearchSaya = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -375,69 +388,76 @@ function PostControllers() {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else if (auth == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
-		} else if (status != null) {
-			Post
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('penulis').equals(penulis)
-				.where('status').equals(status)
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
 		} else {
-			Post
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('penulis').equals(penulis)
-				.where('status').in(['terbit', 'draft'])
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
+			let penulis = auth.user._id;
+
+			if (status != null) {
+				Post
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('penulis').equals(penulis)
+					.where('status').equals(status)
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			} else {
+				Post
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('penulis').equals(penulis)
+					.where('status').in(['terbit', 'draft'])
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			}
 		}
 	}
 
-	this.getAllBySearchSuka = function(req, res) {
-		let auth = true;
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = mongoose.Types.ObjectId(decoded._id);
+	this.getAllBySearchSuka = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
@@ -454,9 +474,11 @@ function PostControllers() {
 
 		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false) {
+		} else if (auth == false || auth.status == false) {
 			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
 		} else {
+			let penyuka = mongoose.Types.ObjectId(auth.user._id);
+
 			Post
 				.aggregate([{
 					$match: {
@@ -541,7 +563,12 @@ function PostControllers() {
 	}
 
 	this.add = async function(req, res) {
-		let auth = Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let meta = req.body.meta;
 		let judul = req.body.judul;
@@ -607,7 +634,12 @@ function PostControllers() {
 
 	this.update = async function(req, res) {
 		// seluruh variabel yang diisi berhubungan dengan otentikasi dan otorisasi
-		let auth = await Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		// seluruh variabel yang diisi dari input
 		let id = req.body.id;
@@ -685,7 +717,12 @@ function PostControllers() {
 	}
 
 	this.delete = async function(req, res) {
-		let auth = await Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 		
 		let id = req.body.id;
 

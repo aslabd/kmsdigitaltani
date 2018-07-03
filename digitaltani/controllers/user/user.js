@@ -363,7 +363,8 @@ function UserControllers() {
 					'email.address': 1,
 					nama: 1,
 					role: 1,
-					foto: 1
+					foto: 1,
+					status: 1
 				})
       			.exec(function(err, user) {
       				if (err) {

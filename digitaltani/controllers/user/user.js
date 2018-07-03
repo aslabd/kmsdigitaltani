@@ -32,11 +32,14 @@ async function createToken(user, login_type, remember_me, res) {
 			kadaluarsa = 60 * 60
 		}
 
-		let token = await jwt.sign({
-			user,
+		let data = {
 			login_type: login_type,
-			remember_me: remember_me,
-		}, configuration.jwt.secret ,{
+			remember_me: remember_me
+		}
+
+		data = Object.assign(user._doc, user);
+
+		let token = await jwt.sign(data, configuration.jwt.secret ,{
 			expiresIn: kadaluarsa
 		})
 

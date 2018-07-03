@@ -33,7 +33,7 @@ async function createToken(user, login_type, remember_me, res) {
 		}
 
 		let token = await jwt.sign({
-			user: user,
+			user,
 			login_type: login_type,
 			remember_me: remember_me,
 		}, configuration.jwt.secret ,{

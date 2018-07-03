@@ -557,7 +557,9 @@ function PostControllers() {
 		}
 		let tag = req.body.tag;
 		let status = req.body.status;
-		let subkategori = req.body.subkategori;			
+		let subkategori = req.body.subkategori;
+
+		console.log(penulis);
 
 		if (penulis == null || judul == null || isi == null || status == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});

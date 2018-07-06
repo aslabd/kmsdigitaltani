@@ -1,5 +1,6 @@
-var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
+
+var Auth = require('./../../auth');
 
 var connection = require('./../../connection');
 
@@ -40,7 +41,7 @@ function BalasanControllers() {
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 
-		if (id_komentar == null) {
+		if (id_komentar == null || skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Komentar
@@ -75,146 +76,157 @@ function BalasanControllers() {
 	this.countFromKomentar = function(req, res) {
 		let id_komentar = mongoose.Types.ObjectId(req.params.id_komentar);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 
-		Komentar
-			.aggregate([{
-				$match: {
-					_id: id_komentar
-				}
-			}, {
-				$unwind: '$balasan'	// pecah data untuk setiap komentar
-			}, {
-				$lookup: {
-					from: 'balasans',	// menggunakan nama collection pada database
-					localField: 'balasan',
-					foreignField: '_id',
-					as: 'balasan'
-				}
-			}, {
-				$match: {
-					'balasan.status': 'terbit'
-				}
-			}, {
-				$group: {
-					_id: '$_id',
-					jumlah_balasan: {
-						$sum: 1
-					}
-				}
-			}])
-			.exec(function(err, balasan) {
-				if (err) {
-					res.status(500).json({status: false, message: 'Ambil jumlah balasan di suatu komentar gagal.', err: err});
-				} else {
-					res.status(200).json({status: true, message: 'Ambil jumlah balasan di suatu komentar berhasil.', data: balasan});
-				}
-			});
-	}
-
-	// Tambah balasan
-	this.add = function(req, res) {
-		var auth = true;
-
-		if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		if (id_komentar == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			let id_komentar = req.body.id_komentar;
-			let isi = req.body.isi;
-
-			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			let penulis = decoded._id;
-
-			if (id_komentar == null || penulis ==  null || isi == null) {
-				res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
-			} else {
-				Komentar
-					.findById(id_komentar)
-					.then(function(komentar) {
-						if (komentar == null || komentar == 0) {
-							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-						} else {
-							Balasan
-								.create({
-									penulis: penulis,
-									isi: isi
-								})
-								.then(function(balasan) {
-									// Balasan yang sudah dibuat, ditaruh di komentar yang sesuai dengan id_komentar
-									Komentar
-										.findById(id_komentar)
-										.then(function(komentar) {
-											komentar.balasan
-												.push(balasan._id)
-											
-											komentar
-												.save(function(err) {
-													// Jika gagal menyimpan balasan ke komentar, maka hapus balasan yang sudah dibuat
-													if (err) {
-														Balasan
-															.findByIdAndRemove(balasan._id)
-															.then(function(balasan) {
-																res.status(500).json({status: false, message: 'Menyimpan balasan gagal. Balasan berhasil dihapus.', err: err});
-															})
-															.catch(function(err) {
-																res.status(500).json({status: false, message: 'Menyimpan balasan gagal. Hapus balasan gagal.', err: err});
-															})
-													} else {
-														res.status(200).json({status: true, message: 'Membuat balasan baru berhasil.'});
-													}
-												})
-										})
-										.catch(function(err) {
-											res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
-										})
-								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Membuat balasan baru gagal.', err: err});
-								})
+			Komentar
+				.aggregate([{
+					$match: {
+						_id: id_komentar
+					}
+				}, {
+					$unwind: '$balasan'	// pecah data untuk setiap komentar
+				}, {
+					$lookup: {
+						from: 'balasans',	// menggunakan nama collection pada database
+						localField: 'balasan',
+						foreignField: '_id',
+						as: 'balasan'
+					}
+				}, {
+					$match: {
+						'balasan.status': 'terbit'
+					}
+				}, {
+					$group: {
+						_id: '$_id',
+						jumlah_balasan: {
+							$sum: 1
 						}
-					})
-					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Komentar gagal ditemukan.', err: err});
-					})
-			}
+					}
+				}])
+				.exec(function(err, balasan) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil jumlah balasan di suatu komentar gagal.', err: err});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil jumlah balasan di suatu komentar berhasil.', data: balasan});
+					}
+				});
 		}
 	}
 
-	this.delete = function(req, res) {
-		let auth = true;
+	// Tambah balasan
+	this.add = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+		
+		let id_komentar = req.body.id_komentar;
+		let isi = req.body.isi;
 
-		if (auth == false) {
-			res.status(401).json({status: false, message: 'Otentikasi gagal.'});
+		if (id_komentar == null || isi == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false || (![2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let id = req.body.id;
-			let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-			let penulis = decoded._id;
+			let penulis = auth.data._id;
 
-			if (id == null || penulis == null) {
-				res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-			} else {
-				Balasan
-					.findById(id)
-					.select('penulis')
-					.then(function(balasan) {
-						if (balasan == null || balasan == 0) {
-							res.status(204).json({status: false, message: 'Balasan tidak ditemukan.'});
-						} else {
-							Balasan
-								.findByIdAndUpdate(id, {
-									status: 'hapus',
-									'tanggal.hapus': Date.now()
-								})
-								.then(function(balasan) {
-									res.status(200).json({status: true, message: 'Hapus balasan berhasil.'});
-								})
-								.catch(function(err) {
-									res.status(500).json({status: false, message: 'Hapus balasan gagal.', err: err});
-								});
-						}
-					})
-					.catch(function(err) {
-						res.status(500).json({status: false, message: 'Ambil balasan gagal.', err: err});
-					});
-			}
+			Komentar
+				.findById(id_komentar)
+				.then(function(komentar) {
+					if (komentar == null || komentar == 0 || komentar.status == 'hapus') {
+						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+					} else {
+						Balasan
+							.create({
+								penulis: penulis,
+								isi: isi
+							})
+							.then(function(balasan) {
+								// Balasan yang sudah dibuat, ditaruh di komentar yang sesuai dengan id_komentar
+								Komentar
+									.findById(id_komentar)
+									.then(function(komentar) {
+										komentar.balasan
+											.push(balasan._id)
+												
+										komentar
+											.save(function(err) {
+												// Jika gagal menyimpan balasan ke komentar, maka hapus balasan yang sudah dibuat
+												if (err) {
+													Balasan
+														.findByIdAndRemove(balasan._id)
+														.then(function(balasan) {
+															res.status(500).json({status: false, message: 'Menyimpan balasan gagal. Balasan berhasil dihapus.', err: err});
+														})
+														.catch(function(err) {
+															res.status(500).json({status: false, message: 'Menyimpan balasan gagal. Hapus balasan gagal.', err: err});
+														})
+												} else {
+													res.status(200).json({status: true, message: 'Membuat balasan baru berhasil.'});
+												}
+											})
+									})
+									.catch(function(err) {
+										res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
+									})
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Membuat balasan baru gagal.', err: err});
+							})
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Komentar gagal ditemukan.', err: err});
+				})
+		}
+	}
+
+	this.delete = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+
+		let id = req.body.id;
+		
+		if (id == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1, 2, 3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else {
+			let penulis = auth.data._id;
+
+			Balasan
+				.findById(id)
+				.select('penulis')
+				.then(function(balasan) {
+					if (balasan == null || balasan == 0 || balasan.status == 'hapus') {
+						res.status(204).json({status: false, message: 'Balasan tidak ditemukan.'});
+					} else if ((balasan.penulis != penulis) && (![1].includes(auth.data.role))) {
+						res.status(403).json({status: false, message: 'Anda bukan penulis balasan ini atau tidak berhak melakukan ini.'});
+					} else {
+						Balasan
+							.findByIdAndUpdate(id, {
+								status: 'hapus',
+								'tanggal.hapus': Date.now()
+							})
+							.then(function(balasan) {
+								res.status(200).json({status: true, message: 'Hapus balasan berhasil.'});
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Hapus balasan gagal.', err: err});
+							});
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Ambil balasan gagal.', err: err});
+				});
 		}	
 	}
 }

@@ -1,19 +1,13 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+// koneksi database yang dibutuhkan
+var connection = require('./../../connection');
+
+var FollowSchema = require('./follow');
+var Follow = connection.model('Follow', FollowSchema);
+
 module.exports = new Schema({
-   	jumlah: {
-   		artikel: { type: Number, default: null },
-   		diskusi: { type: Number, default: null },
-   		materi: { type: Number, default: null },
-   	},
-      pemilik: { type: Schema.Types.ObjectId, required: true },
-   	following: [{
-   		user: { type: Schema.Types.ObjectId, required: true },
-   		tanggal: { type: Date, default: Date.now }
-   	}],
-   	follower: [{
-   		user: { type: Schema.Types.ObjectId, required: true },
-   		tanggal: { type: Date, default: Date.now }
-   	}]
+   pemilik: { type: Schema.Types.ObjectId, required: true },
+   follow: [{ type: Schema.Types.ObjectId, reference: 'Follow', default: null }]
 });

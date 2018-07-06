@@ -65,13 +65,22 @@ function KategoriControllers() {
 	}
 
 	// Tambah kategori
-	this.add = function(req, res) {
+	this.add = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+
 		let meta = req.body.meta;
 		let nama = req.body.nama;
 		let deskripsi = req.body.deskripsi;
 
 		if (nama == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
 			Kategori
 				.create({
@@ -89,8 +98,13 @@ function KategoriControllers() {
 	}
 
 	// Ubah kategori
-	this.update = function(req, res) {
-		let auth = true;
+	this.update = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let id = req.body.id;
 		let meta = req.body.meta;
@@ -99,6 +113,8 @@ function KategoriControllers() {
 
 		if (id == null || nama == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
 			Kategori
 				.findById(id)
@@ -128,13 +144,20 @@ function KategoriControllers() {
 	}
 
 	// Hapus kategori
-	this.delete = function(req, res) {
-		let auth = true;
+	this.delete = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let id = req.body.id;
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
 			Kategori
 				.findById(id)

@@ -390,7 +390,6 @@ function TanyaControllers() {
 		} catch (err) {
 			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
 		}
-		
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);

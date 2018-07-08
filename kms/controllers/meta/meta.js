@@ -345,10 +345,10 @@ function MetaControllers () {
 							// Ambil jumlah balasan
 							temp.jumlah.balasan.call = await fetch(configuration.host + '/tanggapan/balasan/komentar/' + id + '/jumlah');
 							temp.jumlah.balasan.json = await temp.jumlah.balasan.call.json();
-							if (temp.jumlah.komentar.json.data[0] == null) {
-								meta.jumlah.komentar = 0;
+							if (temp.jumlah.balasan.json.data[0] == null) {
+								meta.jumlah.balasan = 0;
 							} else {
-								meta.jumlah.komentar = temp.jumlah.komentar.json.data[0].jumlah_komentar;
+								meta.jumlah.balasan = temp.jumlah.balasan.json.data[0].jumlah_balasan;
 							}
 
 							// Ambil penulis

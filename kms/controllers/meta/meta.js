@@ -24,18 +24,6 @@ var Balasan = connection.model('Balasan', BalasanSchema);
 // fungsi controller Meta
 function MetaControllers () {
 	// Mengambil meta
-	this.getForPenggunaFollower = async function(req, res) {
-		
-	}
-
-	this.getForPenggunaFollowing = async function(req, res) {
-		
-	}
-
-	this.getForUserProfil = async function(req, res) {
-		
-	}
-
 	this.getForPost = function(req, res) {
 		// Ambil token dulu (untuk meta yang berhubungan dengan user secara personal)
 		let authorization = req.headers.authorization;

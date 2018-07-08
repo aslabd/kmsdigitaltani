@@ -4,8 +4,12 @@ var router = express.Router();
 var user = require('./../../controllers/user/user');
 
 // Semua route dengan method get (Urutan berpengaruh pada hasil)
-router.get('/all/:option/:sort', function(req, res) {
-	user.getAll(req, res);
+router.get('/role/:option/:sort', function(req, res) {
+	user.getAllByRole(req, res);
+});
+
+router.get('/cari/role/:option/:sort/:search', function(req, res) {
+	user.getAllByRoleSearch(req, res);
 });
 
 router.get('/:id', function(req, res) {

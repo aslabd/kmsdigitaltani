@@ -395,8 +395,6 @@ function SukaControllers() {
 		}
 		
 		let id = mongoose.Types.ObjectId(req.body.id);
-		let decoded = jwt.decode(req.headers.authorization.split(' ')[1]);
-		let penyuka = mongoose.Types.ObjectId(decoded._id);
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});

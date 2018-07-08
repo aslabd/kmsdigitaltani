@@ -13,24 +13,23 @@ Penjelasan role:
 7 = pakar
 */
 var User = new Schema({
-	username: { type: String, required: true, index: true, unique: true },
+	username: { type: String, required: true, unique: true },
 	email: {
-		address: { type: String, required: true, index: true, unique: true },
+		address: { type: String, required: true, unique: true },
 		status: { type: Boolean, default: false },
 		otp_token: { type: Number, default: null }
 	},
 	telepon: {
-		nomor: { type: String, default: null, index: true, unique: true },
+		nomor: { type: String, unique: true },
 		status: { type: Boolean, default: false },
 		otp_token: { type: Number, default: null }
 	},
 	password: { type: String, required: true },
 	lupa: {
 		status: { type: Boolean, default: null },
-		tanggal: { type: Date, default: null },
 		token: { type: String, default: null }
 	},
-	nama: { type: String, required: true, index: true },
+	nama: { type: String, required: true },
 	tanggal: {
 		daftar: { type: Date, default: Date.now },
 		ubah: { type: Date, default: Date.now },

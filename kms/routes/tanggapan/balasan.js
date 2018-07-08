@@ -3,7 +3,7 @@ var router = express.Router();
 
 var balasan = require('./../../controllers/tanggapan/balasan');
 
-router.get('/:id_komentar/jumlah', function(req, res) {
+router.get('/komentar/:id_komentar/jumlah', function(req, res) {
 	balasan.countFromKomentar(req, res);
 });
 

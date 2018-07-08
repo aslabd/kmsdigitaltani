@@ -1,18 +1,37 @@
+var mongoose = require('mongoose');
 var fetch = require('node-fetch');
 
 var Auth = require('./../../auth');
 
 var configuration = require('./../../configuration');
 
-var Profil = require('./../../models/user/profil');
-var Follow = require('./../../models/user/follow');
+// koneksi database yang dibutuhkan
+var connection = require('./../../connection');
 
-function ProfilControllers() {
-	this.isProfilAda = function(req, res) {
+var ProfilSchema = require('./../../models/user/profil');
+
+var Profil = connection.model('Profil', ProfilSchema);
+
+async function cekProfil(user) {
+	if (user == null) {
+		throw new Error('Ada parameter yang kosong');
+	} else {
+		try {
+			let profil = await Profil.find().where('user').equals(user).exec();
+			if (profil != null && profil != 0) {
+				return profil;
+			} else {
+				return await Profil.create({user: user})
+			}
+		} catch (err) {
+			throw new Error('Gagal ambil profil.');
+		}
 
 	}
-	
-	this.follow = async function(req, res) {
+}
+
+function ProfilControllers() {
+	this.isSayaIkuti = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -20,121 +39,108 @@ function ProfilControllers() {
 			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
 		}
 
-		let id = req.body.id;
+		let user = req.params.user;
 
-		try {
-			let call = await fetch(configuration.url.digitaltani + '/user/' + id);
-			let hasil = await user.json();
-			let user = hasil.data._id;
-		} catch (err) {
-			res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
-		}
-
-		if (id == null) {
+		if (user == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (user == null) {
-			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
 		} else if (auth == false || auth.status == false || (![3, 4, 5, 6].includes(auth.data.role))) {
 			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
-			let pemilik = auth.data._id;
-
+			let pengikut = auth.data._id;
+			
 			Profil
-				.find()
-				.where('pemilik').equals(pemilik)
+				.findOne()
+				.where('user').equals(user)
 				.exec(function(err, profil) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
 					} else if (profil == null || profil == 0) {
-						Profil
-							.create({
-								pemilik: pemilik
-							})
-							.then(function(profil) {
-								Follow
-									.create({
-										user: user
-									})
-									.then(function(follow) {
-										profil.follow
-												.push(follow._id);
-											
-										profil
-											.save(function(err, profil) {
-												if (err) {
-													res.status(500).json({status: false, message: 'Simpan profil gagal.', err: err});
-												} else {
-													res.status(200).json({status: true, message: 'Ikuti pengguna berhasil.', data: profil});
-												}
-											})
-									})
-									.catch(function(err) {
-										res.status(500).json({status: false, message: 'Mengikuti pengguna gagal.', err: err});
-									})
-							})
-							.catch(function(err) {
-								res.status(500).json({status: false, message: 'Membuat profil gagal.', err: err});
-							})
+						res.status(204).json({status: false, message: 'Profil tidak ditemukan.'});
 					} else {
 						Profil
-							.aggregate([{
-								$lookup: {
-									from: 'follows',
-									localField: 'follow',
-									foreignField: '_id',
-									as: 'follow'
-								}
-							}, {
-								$match: {
-									pemilik: pemilik,
-									'follow.user': user
-								}
-							}])
-							.exec(function(err, diikuti) {
+							.findOne()
+							.where('user').equals(user)
+							.where('pengikut').in([pengikut])
+							.exec(function(err, ikuti) {
+								console.log(profil)
 								if (err) {
 									res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
-								} else if (diikuti == null || diikuti == 0) {
-									Follow
-										.create({
-											user: user
-										})
-										.then(function(follow) {
-											profil.follow
-												.push(follow._id);
-											
-											profil
-												.save(function(err, follow) {
-													if (err) {
-														res.status(500).json({status: false, message: 'Simpan profil gagal.', err: err});
-													} else {
-														res.status(200).json({status: true, message: 'Ikuti pengguna berhasil.', data: topik});
-													}
-												})
-										})
-										.catch(function(err) {
-											res.status(500).json({status: false, message: 'Ikuti pengguna gagal.', err: err});
-										});
+								} else if (ikuti == null || ikuti == 0) {
+									res.status(200).json({status: true, message: 'Ambil flag saya ikuti berhasil', data: false});
 								} else {
-									Suka
-										.findByIdAndRemove(topik.suka[0])
-										.then(function(suka) {
-											topik.suka
-												.pull(suka._id)
-											
-											topik
-												.save(function(err, topik) {
-													if (err) {
-														res.status(500).json({status: false, message: 'Simpan batal suka materi gagal.', err: err});
-													} else {
-														res.status(200).json({status: true, message: 'Batal suka materi berhasil.', data: topik});
-													}
-												})
-										})
-										.catch(function(err) {
-											res.status(500).json({status: false, message: 'Batal suka materi gagal.', err: err});
-										});
+									res.status(200).json({status: true, message: 'Ambil flag saya ikuti berhasil', data: true});
 								}
-							});
+							})
+					}
+				})
+		}
+
+	}
+
+	this.ubah = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+		
+		let user = req.body.user;
+
+		if (user == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false || (![3, 4, 5, 6].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else if (auth.data._id == user) {
+			res.status(400).json({status: false, message: 'Tidak dapat mengikuti diri sendiri.'});
+		} else {
+			let pengikut = auth.data._id;
+			
+			await cekProfil(user);
+			
+			Profil
+				.findOne()
+				.where('user').equals(user)
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: false, message: 'Profil tidak ditemukan.'});
+					} else {
+						Profil
+							.findOne()
+							.where('user').equals(user)
+							.where('pengikut').in([pengikut])
+							.exec(function(err, ikuti) {
+								console.log(profil)
+								if (err) {
+									res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
+								} else if (ikuti == null || ikuti == 0) {
+									profil.pengikut
+										.push(pengikut)
+	
+									profil
+										.save(function(err, profil) {
+											if (err) {
+												res.status(500).json({status: false, message: 'Simpan ikuti pengguna gagal.', err: err});
+											} else {
+												res.status(200).json({status: true, message: 'Ikuti pengguna berhasil.', data: profil});
+											}
+										})
+								} else {
+									profil.pengikut
+										.pull(pengikut)
+
+									profil
+										.save(function(err, profil) {
+											if (err) {
+												res.status(500).json({status: false, message: 'Simpan batal ikuti pengguna gagal.', err: err});
+											} else {
+												res.status(200).json({status: true, message: 'Batal ikuti pengguna berhasil.', data: profil});
+											}
+										})
+								}
+							})
 					}
 				})
 		}

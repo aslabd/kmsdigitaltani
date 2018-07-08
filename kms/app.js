@@ -66,7 +66,7 @@ app.use('/api/tanggapan/balasan/*', balasan);
 app.use('/api/tanggapan/suka', suka);
 app.use('/api/tanggapan/suka/*', suka);
 app.use('/api/user/profil', profil);
-app.use('/api/user/profil*', profil);
+app.use('/api/user/profil/*', profil);
 app.use('/api/meta/meta', meta);
 app.use('/api/meta/meta/*', meta);
 

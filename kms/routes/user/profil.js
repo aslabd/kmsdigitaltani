@@ -3,12 +3,24 @@ var router = express.Router();
 
 var profil = require('./../../controllers/user/profil');
 
-router.get('/', function(req, res) {
-	res.status(410).json({status: false, message: 'Tidak ada apa-apa disini.'});
+router.get('/:user', function(req, res) {
+	profil.get(req, res);
 });
 
-router.get('/:id', function(req, res) {
-	profil.get(req, res);
+router.put('/ikuti', function(req, res) {
+	profil.ubah(req, res);
+});
+
+router.put('/ikuti/:user/saya', function(req, res) {
+	profil.isSayaIkuti(req, res);
+});
+
+router.get('/all/:option/:sort', function(req, res) {
+	profil.getAllByRole(req, res);
+});
+
+router.get('/cari/:option/:sort/:search', function(req, res) {
+	profil.getAllByRoleSearch(req, res);
 });
 
 router.post('/tambah', function(req, res) {

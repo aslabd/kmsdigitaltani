@@ -8,7 +8,7 @@ module.exports = {
 			options: {
 				user: 'digitaltani',
 				pass: 'digitaltani1234',
-				autoIndex: false,
+				autoIndex: true,
 				autoReconnect: true,
 				reconnectTries: Number.MAX_VALUE,
 				reconnectInterval: 500,
@@ -17,9 +17,14 @@ module.exports = {
 			}
 		}
 	},
+	https: {
+		credentials: {
+			key: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem'),
+			cert: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/fullchain.pem')
+		}
+	},
 	jwt: {
-		secret: 'enakmantepportal'
-		// secret: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem')
+		secret: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem')
 	},
 	email: {
 		address: 'portalharga.ipb@gmail.com',

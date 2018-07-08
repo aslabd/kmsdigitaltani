@@ -1,13 +1,21 @@
+/*
+Catatan:
+Profil hanya dibuat untuk setiap pengguna yang dapat menerbitkan artikel dan materi
+*/
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // koneksi database yang dibutuhkan
 var connection = require('./../../connection');
 
-var FollowSchema = require('./follow');
-var Follow = connection.model('Follow', FollowSchema);
-
 module.exports = new Schema({
-   pemilik: { type: Schema.Types.ObjectId, required: true },
-   follow: [{ type: Schema.Types.ObjectId, reference: 'Follow', default: null }]
+	meta: {
+		jumlah: {
+			artikel: { type: Number, default: null },
+			materi: { type: Number, default: null },
+			pengikut: { type: Number, default: null }
+		}
+	},
+	user: { type: Schema.Types.ObjectId, required: true },
+	pengikut: [{ type: Schema.Types.ObjectId }]
 });

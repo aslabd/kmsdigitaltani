@@ -3,12 +3,14 @@
 /**
  * Module dependencies.
  */
-
-var app = require('../app');
-var debug = require('debug')('digitaltani:server');
 var https = require('https');
 var http = require('http');
 var fs = require('fs');
+
+var app = require('../app');
+var debug = require('debug')('digitaltani:server');
+
+var configuration = require('./../configuration');
 
 /**
  * Get port from environment and store in Express.
@@ -20,13 +22,8 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-var credentials = {
-  key: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/abdurrohim.id/fullchain.pem')
-}
-
 var server = http.createServer(app);
-// var server = https.createServer(credentials, app);
+// var server = https.createServer(configuration.https.credentials, app);
 
 /**
  * Listen on provided port, on all network interfaces.

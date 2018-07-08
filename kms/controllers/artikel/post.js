@@ -758,6 +758,36 @@ function PostControllers() {
 				});
 		}
 	}
+
+	this.countFromPenulis = function(req, res) {
+		let penulis = mongoose.Types.ObjectId(req.params.penulis);
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Post
+				.aggregate([{
+					$match: {
+						penulis: penulis,
+						'komentar.status': 'terbit'
+					}
+				}, {
+					$group: {
+						penulis: '$penulis',
+						jumlah_artikel: {
+							$sum: 1
+						}
+					}
+				}])
+				.exec(function(err, post) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil jumlah artikel penulis gagal.', err: err});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil jumlah artikel penulis berhasil.', data: post})
+					}
+				});
+		}
+	}
 }
 
 module.exports = new PostControllers();

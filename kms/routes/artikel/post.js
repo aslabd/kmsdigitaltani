@@ -20,6 +20,10 @@ router.get('/suka/:option/:sort', function(req, res) {
 	post.getAllBySayaSuka(req, res);
 });
 
+router.get('/penulis/:penulis/jumlah', function(req, res) {
+	post.countFromPenulis(req, res);
+});
+
 router.get('/penulis/:penulis/:option/:sort', function(req, res) {
 	post.getAllByPenulis(req, res);
 });

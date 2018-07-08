@@ -371,7 +371,6 @@ function MetaControllers () {
 							}
 							res.status(200).json({status: true, message: 'Ambil meta berhasil.', data: meta});
 						} catch (err) {
-							console.log(err);
 							res.status(500).json({status: false, message: 'Ambil meta gagal.', err: err});
 						}
 					})();

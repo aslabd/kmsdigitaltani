@@ -609,7 +609,7 @@ function TanyaControllers() {
 					.create({
 						meta: meta,
 						penulis: penulis,
-						'tanggal.terbit': Date.now,
+						'tanggal.terbit': Date.now(),
 						judul: judul,
 						ringkasan: ringkasan,
 						isi: isi,

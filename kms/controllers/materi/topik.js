@@ -211,6 +211,10 @@ function TopikControllers() {
 			
 			Topik
 				.aggregate([{
+					$match: {
+						status: 'terbit'
+					}
+				}, {
 					$lookup: {
 						from: 'sukas',
 						localField: 'suka',

@@ -228,6 +228,10 @@ function TanyaControllers() {
 
 			Tanya
 				.aggregate([{
+					$match: {
+						status: 'terbit'
+					}
+				}, {
 					$lookup: {
 						from: 'sukas',
 						localField: 'suka',

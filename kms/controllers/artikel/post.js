@@ -222,6 +222,10 @@ function PostControllers() {
 
 			Post
 				.aggregate([{
+					$match: {
+						status: 'terbit'
+					}
+				}, {
 					$lookup: {
 						from: 'sukas',
 						localField: 'suka',

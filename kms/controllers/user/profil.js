@@ -74,7 +74,7 @@ async function getMetaForProfil(req, profil, res) {
 }
 
 function ProfilControllers() {
-	this.getMengikuti = function(req, res) {
+	this.getMengikuti = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);

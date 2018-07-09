@@ -13,10 +13,10 @@ router.get('/:jenis/:id/saya', function(req, res) {
 	} else if (req.params.jenis == 'materi') {
 		req.params.id_topik = req.params.id;
 		suka.isSayaSukaTopik(req, res);
-	} else if (req.params.jenis = 'komentar') {
+	} else if (req.params.jenis == 'komentar') {
 		req.params.id_komentar = req.params.id;
 		suka.isSayaSukaKomentar(req, res);
-	} else if (req.params.jenis = 'balasan') {
+	} else if (req.params.jenis == 'balasan') {
 		req.params.id_balasan = req.params.id;
 		suka.isSayaSukaBalasan(req, res);
 	} else {
@@ -34,10 +34,10 @@ router.get('/:jenis/:id/jumlah', function(req, res) {
 	} else if (req.params.jenis == 'materi') {
 		req.params.id_topik = req.params.id;
 		suka.countFromTopik(req, res);
-	} else if (req.params.jenis = 'komentar') {
+	} else if (req.params.jenis == 'komentar') {
 		req.params.id_komentar = req.params.id;
 		suka.countFromKomentar(req, res);
-	} else if (req.params.jenis = 'balasan') {
+	} else if (req.params.jenis == 'balasan') {
 		req.params.id_balasan = req.params.id;
 		suka.countFromBalasan(req, res);
 	} else {
@@ -55,10 +55,10 @@ router.get('/:jenis/:id/:option', function(req, res) {
 	} else if (req.params.jenis == 'materi') {
 		req.params.id_topik = req.params.id;
 		suka.getAllFromTopik(req, res);
-	} else if (req.params.jenis = 'komentar') {
+	} else if (req.params.jenis == 'komentar') {
 		req.params.id_komentar = req.params.id;
 		suka.getAllFromKomentar(req, res);
-	} else if (req.params.jenis = 'balasan') {
+	} else if (req.params.jenis == 'balasan') {
 		req.params.id_balasan = req.params.id;
 		suka.getAllFromBalasan(req, res);
 	} else {
@@ -76,10 +76,10 @@ router.put('/:jenis/ubah', function(req, res) {
 	} else if (req.params.jenis == 'materi') {
 		req.body.id_topik = req.body.id;
 		suka.ubahToTopik(req, res);
-	} else if (req.params.jenis = 'komentar') {
+	} else if (req.params.jenis == 'komentar') {
 		req.body.id_komentar = req.body.id;
 		suka.ubahToKomentar(req, res);
-	} else if (req.params.jenis = 'balasan') {
+	} else if (req.params.jenis == 'balasan') {
 		req.body.id_balasan = req.body.id;
 		suka.ubahToBalasan(req, res);
 	} else {

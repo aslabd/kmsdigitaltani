@@ -357,7 +357,7 @@ function SukaControllers() {
 	this.countFromBalasan = function(req, res) {
 		let id_balasan = mongoose.Types.ObjectId(req.params.id_balasan);	// casting string jadi ObjectId (khusus untuk fungsi aggregate)
 
-		if (id == null) {
+		if (id_balasan == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			Balasan

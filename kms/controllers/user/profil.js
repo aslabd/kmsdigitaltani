@@ -30,7 +30,7 @@ async function cekProfil(user) {
 	}
 }
 
-async function getMetaForProfils(req, userss, res) {
+async function getMetaForProfils(req, profils, res) {
 	let options = {};
 	let authorization = req.headers.authorization;
 
@@ -40,7 +40,7 @@ async function getMetaForProfils(req, userss, res) {
 		}
 	}
 
-	for (let item of users) {
+	for (let item of profils) {
 		try {
 			let meta = await fetch(configuration.host + '/meta/meta/profil/' + item._id, options);
 			let meta_json = await meta.json();
@@ -50,7 +50,7 @@ async function getMetaForProfils(req, userss, res) {
 			res.status(500).json({status: false, message: 'Ambil meta profil gagal.', err: err});
 		}
 	}
-	res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: posts});
+	res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: users});
 }
 
 async function getMetaForProfil(req, profil, res) {
@@ -74,6 +74,38 @@ async function getMetaForProfil(req, profil, res) {
 }
 
 function ProfilControllers() {
+	this.getMengikuti = function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+
+		if (auth == false || auth.status == false || (![3, 4, 5, 6].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else {
+			let pengikut = auth.data._id;
+
+			Profil
+				.find()
+				.where('pengikut').in([pengikut])
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil profil pengguna gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
+					} else {
+						res.status(200).json({status: true, message: 'Ambil profil pengguna berhasil.', data: profil})
+					}
+				})
+		}
+	}
+
+	this.getDiikuti = function(req, res) {
+
+	}
+	
 	this.getByUser = async function(req, res) {
 		let user = req.params.user;
 
@@ -92,7 +124,6 @@ function ProfilControllers() {
 						res.status(204).json({status: true, message: 'Profil tidak ditemukan..'});
 					} else {
 						getMetaForProfil(req, profil, res);
-						//res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: profil});
 					}
 				});
 		}

@@ -60,20 +60,20 @@ function FileControllers() {
 			.exec(function(err, file) {
 				if (err) {
 					res.status(500).json({status: false, message: 'Ambil file gagal.', err: err});
-				} else {
-					if (file.jenis == 'gambar') {
-						res.sendFile(path.resolve('uploads/gambar/' + file.nama.sistem) , function(err) {
-							if (err) {
-								res.status(500).json({status: false, message: 'Stream gambar gagal.', err: err});
-							}
-						});
-					} else if (file.jenis == 'materi') { 
-						res.download(path.resolve('uploads/materi/' + file.nama.sistem), file.nama.asli, function(err) {
-							if (err) {
-								res.status(500).json({status: false, message: 'Download materi gagal.', err: err});
-							}
-						});
-					}
+				} else if (file == null || file == 0) {
+					res.status(204).json({status: false, message: 'File tidak ditemukan.'});
+				} else if (file.jenis == 'gambar') {
+					res.sendFile(path.resolve('uploads/gambar/' + file.nama.sistem) , function(err) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Stream gambar gagal.', err: err});
+						}
+					});
+				} else if (file.jenis == 'materi') { 
+					res.download(path.resolve('uploads/materi/' + file.nama.sistem), file.nama.asli, function(err) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Download materi gagal.', err: err});
+						}
+					});
 				}
 			});
 	}

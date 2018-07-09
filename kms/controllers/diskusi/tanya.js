@@ -2,6 +2,8 @@
 var mongoose = require('mongoose');
 var fetch = require('node-fetch');
 
+var Auth = require('./../../auth');
+
 // koneksi database yang dibutuhkan
 var connection = require('./../../connection');
 

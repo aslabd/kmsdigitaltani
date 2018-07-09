@@ -334,14 +334,12 @@ function MetaControllers () {
 
 		Topik
 			.findById(id)
-			.select({
-				penulis: 1
-			})
-			.exec(function(err, tanya) {
+			.select('penulis')
+			.exec(function(err, topik) {
 				if (err) {
-					res.status(500).json({status: false, message: 'Ambil pertanyaan gagal.', err: err});
-				} else if (tanya == null || tanya == 0) {
-					res.status(204).json({status: false, message: 'Pertanyaan tidak ditemukan.'});
+					res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
+				} else if (topik == null || topik == 0) {
+					res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
 				} else {
 					(async() => {
 						try {
@@ -390,7 +388,7 @@ function MetaControllers () {
 			});
 	}
 
-	this.getForKomentar = async function(req, res) {
+	this.getForKomentar = function(req, res) {
 		// Ambil token dulu (untuk meta yang berhubungan dengan user secara personal)
 		let authorization = req.headers.authorization;
 			
@@ -477,7 +475,7 @@ function MetaControllers () {
 			});
 	}
 
-	this.getForBalasan = async function(req, res) {
+	this.getForBalasan = function(req, res) {
 		// Ambil token dulu (untuk meta yang berhubungan dengan user secara personal)
 		let authorization = req.headers.authorization;
 			
@@ -493,7 +491,8 @@ function MetaControllers () {
 			},
 			saya: {
 				suka: {}
-			}
+			},
+			penulis: {}
 		};
 
 		let meta = {
@@ -511,9 +510,9 @@ function MetaControllers () {
 			.select('penulis')
 			.exec(function(err, balasan) {
 				if (err) {
-					res.status(500).json({status: false, message: 'Ambil komentar gagal.', err: err});
-				} else if (komentar == null || komentar == 0) {
-					res.status(204).json({status: false, message: 'Komentar tidak ditemukan'});
+					res.status(500).json({status: false, message: 'Ambil balasan gagal.', err: err});
+				} else if (balasan == null || balasan == 0) {
+					res.status(204).json({status: false, message: 'Balasan tidak ditemukan'});
 				} else {
 					(async() => {
 						try {

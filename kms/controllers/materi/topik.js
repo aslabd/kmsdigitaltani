@@ -723,6 +723,35 @@ function TopikControllers() {
 				});
 		}
 	}
+
+	this.countFromPenulis = function(req, res) {
+		let penulis = mongoose.Types.ObjectId(req.params.penulis);
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Topik
+				.aggregate([{
+					$match: {
+						penulis: penulis,
+					}
+				}, {
+					$group: {
+						_id: '$penulis',
+						jumlah_topik: {
+							$sum: 1
+						}
+					}
+				}])
+				.exec(function(err, topik) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil jumlah materi penulis gagal.', err: err});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil jumlah materi penulis berhasil.', data: topik})
+					}
+				});
+		}
+	}
 }
 
 module.exports = new TopikControllers();

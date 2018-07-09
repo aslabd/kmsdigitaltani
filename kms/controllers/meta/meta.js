@@ -13,6 +13,7 @@ var TanyaSchema = require('./../../models/diskusi/tanya');
 var TopikSchema = require('./../../models/materi/topik');
 var KomentarSchema = require('./../../models/tanggapan/komentar');
 var BalasanSchema = require('./../../models/tanggapan/balasan');
+var ProfilSchema = require('./../../models/user/profil');
 
 // koneksikan skema dengan database
 var Post = connection.model('Post', PostSchema);
@@ -20,10 +21,108 @@ var Tanya = connection.model('Tanya', TanyaSchema);
 var Topik = connection.model('Topik', TopikSchema);
 var Komentar = connection.model('Komentar', KomentarSchema);
 var Balasan = connection.model('Balasan', BalasanSchema);
+var Profil = connection.model('Profil', ProfilSchema);
 
 // fungsi controller Meta
 function MetaControllers () {
 	// Mengambil meta
+	this.getForProfil = function(req, res) {
+		// Ambil token dulu (untuk meta yang berhubungan dengan user secara personal)
+		let authorization = req.headers.authorization;
+		
+		// Ambil semua parameter
+		let user = req.params.user;
+
+		// Variabel untuk simpan call dan json
+		let temp = {
+			jumlah: {
+				post: {},
+				tanya: {},
+				topik: {}
+			},
+			saya: {
+				ikuti: {}
+			},
+			user: {}
+		};
+
+		let	meta = {
+			jumlah: {
+				post: {},
+				tanya: {},
+				topik: {}
+			},
+			saya: {
+				ikuti: {}
+			},
+			user: {}
+		};
+
+		Profil
+			.findOne()
+			.where('user').equals(user)
+			.exec(function(err, profil) {
+				if (err) {
+					res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
+				} else if (profil == null || profil == 0) {
+					res.status(204).json({status: false, message: 'Profil tidak ditemukan.'});
+				} else {
+					(async() => {
+						try {
+							// Ambil jumlah post
+							temp.jumlah.post.call = await fetch(configuration.host + '/artikel/post/penulis/' + user + '/jumlah');
+							temp.jumlah.post.json = await temp.jumlah.post.call.json();
+							if (temp.jumlah.post.json.data[0] == null) {
+								meta.jumlah.post = 0;
+							} else {
+								meta.jumlah.post = temp.jumlah.post.json.data[0].jumlah_post;
+							}
+
+							// Ambil jumlah tanya
+							temp.jumlah.tanya.call = await fetch(configuration.host + '/diskusi/tanya/penulis/' + user + '/jumlah');
+							temp.jumlah.tanya.json = await temp.jumlah.tanya.call.json();
+							if (temp.jumlah.tanya.json.data[0] == null) {
+								meta.jumlah.tanya = 0;
+							} else {
+								meta.jumlah.tanya = temp.jumlah.tanya.json.data[0].jumlah_tanya;
+							}
+
+							// Ambil jumlah topik
+							temp.jumlah.topik.call = await fetch(configuration.host + '/materi/topik/penulis/' + user + '/jumlah');
+							temp.jumlah.topik.json = await temp.jumlah.topik.call.json();
+							if (temp.jumlah.topik.json.data[0] == null) {
+								meta.jumlah.topik = 0;
+							} else {
+								meta.jumlah.topik = temp.jumlah.topik.json.data[0].jumlah_topik;
+							}
+
+							// Ambil user
+							temp.user.call = await fetch(configuration.url.digitaltani + '/user/' + user);
+							temp.user.json = await temp.user.call.json();
+							meta.user = temp.user.json.data;
+
+							// Ambil flag saya suka suatu jenis dengan id
+							if (authorization == null) {
+								meta.saya.ikuti = null;
+							} else {
+								let options = {
+									headers: {
+										'Authorization': authorization
+									}
+								}
+								temp.saya.ikuti.call = await fetch(configuration.host + '/user/profil/ikuti/' + user + '/saya', options);
+								temp.saya.ikuti.json = await temp.saya.ikuti.call.json();
+								meta.saya.ikuti = temp.saya.ikuti.json.data;
+							}
+							res.status(200).json({status: true, message: 'Ambil meta berhasil.', data: meta});
+						} catch (err) {
+							res.status(500).json({status: false, message: 'Ambil meta gagal.', err: err});
+						}
+					})();
+				}
+			});
+	}
+
 	this.getForPost = function(req, res) {
 		// Ambil token dulu (untuk meta yang berhubungan dengan user secara personal)
 		let authorization = req.headers.authorization;

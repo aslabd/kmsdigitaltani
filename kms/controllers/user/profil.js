@@ -30,7 +30,75 @@ async function cekProfil(user) {
 	}
 }
 
+async function getMetaForProfils(req, userss, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	for (let item of users) {
+		try {
+			let meta = await fetch(configuration.host + '/meta/meta/profil/' + item._id, options);
+			let meta_json = await meta.json();
+			item.meta = Object.assign(item.meta, meta_json.data);
+		} catch (err) {
+			break;
+			res.status(500).json({status: false, message: 'Ambil meta profil gagal.', err: err});
+		}
+	}
+	res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: posts});
+}
+
+async function getMetaForProfil(req, profil, res) {
+	let options = {};
+	let authorization = req.headers.authorization;
+
+	if (authorization != null) {
+		options.headers = {
+			'Authorization': req.headers.authorization
+		}
+	}
+
+	try {
+		let meta = await fetch(configuration.host + '/meta/meta/profil/' + profil.user, options);
+		let meta_json = await meta.json();
+		profil.meta = Object.assign(profil.meta, meta_json.data);
+		res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: profil});
+	} catch (err) {
+		res.status(500).json({status: false, message: 'Ambil meta profil gagal.', err: err});
+	}
+}
+
 function ProfilControllers() {
+	this.getByUser = async function(req, res) {
+		let user = req.params.user;
+
+		await cekProfil(user);
+
+		if (user == null) {
+			res.status(400).json({status: true, message: 'Ada parameter yang kosong.'});
+		} else {
+			Profil
+				.findOne()
+				.where('user').equals(user)
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: true, message: 'Ambil profil gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: true, message: 'Profil tidak ditemukan..'});
+					} else {
+						getMetaForProfil(req, profil, res);
+						//res.status(200).json({status: true, message: 'Ambil profil berhasil.', data: profil});
+					}
+				});
+		}
+
+	}
+
 	this.isSayaIkuti = async function(req, res) {
 		let auth;
 		try {

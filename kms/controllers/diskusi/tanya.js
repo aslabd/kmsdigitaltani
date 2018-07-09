@@ -757,6 +757,35 @@ function TanyaControllers() {
 				});
 		}
 	}
+
+	this.countFromPenulis = function(req, res) {
+		let penulis = mongoose.Types.ObjectId(req.params.penulis);
+
+		if (penulis == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			Tanya
+				.aggregate([{
+					$match: {
+						penulis: penulis,
+					}
+				}, {
+					$group: {
+						_id: '$penulis',
+						jumlah_tanya: {
+							$sum: 1
+						}
+					}
+				}])
+				.exec(function(err, tanya) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil jumlah pertanyaan penulis gagal.', err: err});
+					} else {
+						res.status(200).json({status: true, message: 'Ambil jumlah pertanyaan penulis berhasil.', data: tanya})
+					}
+				});
+		}
+	}
 }
 
 module.exports = new TanyaControllers();

@@ -769,12 +769,11 @@ function PostControllers() {
 				.aggregate([{
 					$match: {
 						penulis: penulis,
-						'komentar.status': 'terbit'
 					}
 				}, {
 					$group: {
-						penulis: '$penulis',
-						jumlah_artikel: {
+						_id: '$penulis',
+						jumlah_post: {
 							$sum: 1
 						}
 					}

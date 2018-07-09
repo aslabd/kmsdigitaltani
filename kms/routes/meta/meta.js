@@ -3,9 +3,9 @@ var router = express.Router();
 
 var meta = require('./../../controllers/meta/meta');
 
-// router.get('/:jenis/:id', function(req, res) {
-// 	meta.get(req, res);
-// });
+router.get('/profil/:user', function(req, res) {
+	meta.getForProfil(req, res);
+});
 
 router.get('/:jenis/:id', function(req, res) {
 	if (req.params.jenis == 'artikel') {

@@ -1,8 +1,11 @@
 var mongoose = require('mongoose');
+var fetch = require('node-fetch');
 
 var Auth = require('./../../auth');
 
 var connection = require('./../../connection');
+
+var configuration = require('./../../configuration');
 
 var KomentarSchema = require('./../../models/tanggapan/komentar');
 var BalasanSchema = require('./../../models/tanggapan/balasan');

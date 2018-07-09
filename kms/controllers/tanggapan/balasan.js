@@ -22,7 +22,7 @@ async function getMetaForBalasans(req, balasans, res) {
 
 	for (let item of balasans) {
 		try {
-			let meta = await fetch(configuration.host + '/meta/meta/artikel/' + item._id, options);
+			let meta = await fetch(configuration.host + '/meta/meta/balasan/' + item._id, options);
 			let meta_json = await meta.json();
 			item.meta = Object.assign(item.meta, meta_json.data);
 		} catch (err) {

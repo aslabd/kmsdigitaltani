@@ -696,6 +696,8 @@ function TopikControllers() {
 		} else if (auth == false || auth.status == false || (![1, 2, 3, 7].includes(auth.data.role))) {
 			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
+			let penulis = auth.data._id;
+
 			Topik
 				.findById(id)
 				.select('penulis')
@@ -719,6 +721,7 @@ function TopikControllers() {
 					}
 				})
 				.catch(function(err) {
+					console.log(err);
 					res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
 				});
 		}

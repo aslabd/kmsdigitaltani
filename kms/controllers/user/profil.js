@@ -131,7 +131,6 @@ function ProfilControllers() {
 						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
 					} else {
 						getInfoPenggunaMengikuti(profil, res)
-						// res.status(200).json({status: true, message: 'Ambil profil pengguna berhasil.', data: profil})
 					}
 				})
 		}
@@ -150,6 +149,51 @@ function ProfilControllers() {
 		} else {
 			let user = auth.data._id;
 			
+			await cekProfil(user);
+
+			Profil
+				.findOne()
+				.where('user').equals(user)
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: true, message: 'Ambil profil gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: true, message: 'Profil tidak ditemukan..'});
+					} else {
+						getInfoPenggunaPengikut(profil.pengikut, res);
+					}
+				});
+		}
+	}
+
+	this.getAllByPengikutMengikuti = function(req, res) {
+		let pengikut = req.params.pengikut;
+
+		if (pengikut == null) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else {
+			Profil
+				.find()
+				.where('pengikut').equals([pengikut])
+				.select('user')
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: false, message: 'Ambil profil pengguna gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
+					} else {
+						getInfoPenggunaMengikuti(profil, res)
+					}
+				})
+		}
+	}
+
+	this.getAllByUserPengikut = function(req, res) {
+		let user = req.params.user;
+
+		if (user == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {	
 			await cekProfil(user);
 
 			Profil

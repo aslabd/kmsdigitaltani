@@ -7,6 +7,14 @@ router.get('/:user', function(req, res) {
 	profil.getByUser(req, res);
 });
 
+router.get('/saya/ikuti/', function(req, res) {
+	profil.getAllBySayaMengikuti(req, res);
+});
+
+router.get('/saya/pengikut/', function(req, res) {
+	profil.getAllBySayaPengikut(req, res);
+});
+
 router.put('/ikuti', function(req, res) {
 	profil.ubah(req, res);
 });

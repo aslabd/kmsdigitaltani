@@ -73,8 +73,41 @@ async function getMetaForProfil(req, profil, res) {
 	}
 }
 
+async function getInfoPenggunaPengikut(pengikuts, res) {
+	let users = [];
+
+	for (let item of pengikuts) {
+		try {
+			let user = await fetch(configuration.url.digitaltani + '/user/' + item);
+			let user_json = await user.json();
+			users.push(user_json.data);
+		} catch (err) {
+			break;
+			res.status(500).json({status: false, message: 'Ambil info pengikut gagal.', err: err});
+		}
+	}
+	res.status(200).json({status: true, message: 'Ambil pengikut berhasil.', data: users});
+}
+
+async function getInfoPenggunaMengikuti(profils, res) {
+	let users = [];
+
+
+	for (let item of profils) {
+		try {
+			let user = await fetch(configuration.url.digitaltani + '/user/' + item.user);
+			let user_json = await user.json();
+			users.push(user_json.data);
+		} catch (err) {
+			break;
+			res.status(500).json({status: false, message: 'Ambil info ikuti gagal.', err: err});
+		}
+	}
+	res.status(200).json({status: true, message: 'Ambil ikuti berhasil.', data: users});
+}
+
 function ProfilControllers() {
-	this.getMengikuti = async function(req, res) {
+	this.getAllBySayaMengikuti = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -82,38 +115,66 @@ function ProfilControllers() {
 			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
 		}
 
-		if (auth == false || auth.status == false || (![3, 4, 5, 6].includes(auth.data.role))) {
+		if (auth == false || auth.status == false || (![3, 4, 5, 6, 7].includes(auth.data.role))) {
 			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
 			let pengikut = auth.data._id;
 
 			Profil
 				.find()
-				.where('pengikut').in([pengikut])
+				.where('pengikut').equals([pengikut])
+				.select('user')
 				.exec(function(err, profil) {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil profil pengguna gagal.', err: err});
 					} else if (profil == null || profil == 0) {
 						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
 					} else {
-						res.status(200).json({status: true, message: 'Ambil profil pengguna berhasil.', data: profil})
+						getInfoPenggunaMengikuti(profil, res)
+						// res.status(200).json({status: true, message: 'Ambil profil pengguna berhasil.', data: profil})
 					}
 				})
 		}
 	}
 
-	this.getDiikuti = function(req, res) {
+	this.getAllBySayaPengikut = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
+		if (auth == false || auth.status == false || (![3, 4, 5, 6, 7].includes(auth.data.role))) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else {
+			let user = auth.data._id;
+			
+			await cekProfil(user);
+
+			Profil
+				.findOne()
+				.where('user').equals(user)
+				.exec(function(err, profil) {
+					if (err) {
+						res.status(500).json({status: true, message: 'Ambil profil gagal.', err: err});
+					} else if (profil == null || profil == 0) {
+						res.status(204).json({status: true, message: 'Profil tidak ditemukan..'});
+					} else {
+						getInfoPenggunaPengikut(profil.pengikut, res);
+					}
+				});
+		}
 	}
 	
 	this.getByUser = async function(req, res) {
 		let user = req.params.user;
 
-		await cekProfil(user);
-
 		if (user == null) {
 			res.status(400).json({status: true, message: 'Ada parameter yang kosong.'});
 		} else {
+			await cekProfil(user);
+			
 			Profil
 				.findOne()
 				.where('user').equals(user)

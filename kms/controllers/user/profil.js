@@ -188,7 +188,7 @@ function ProfilControllers() {
 		}
 	}
 
-	this.getAllByUserPengikut = function(req, res) {
+	this.getAllByUserPengikut = async function(req, res) {
 		let user = req.params.user;
 
 		if (user == null) {

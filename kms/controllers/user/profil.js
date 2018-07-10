@@ -232,7 +232,6 @@ function ProfilControllers() {
 					}
 				});
 		}
-
 	}
 
 	this.isSayaIkuti = async function(req, res) {

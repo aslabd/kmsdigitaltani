@@ -774,6 +774,7 @@ function TanyaControllers() {
 				.aggregate([{
 					$match: {
 						penulis: penulis,
+						status: 'terbit'
 					}
 				}, {
 					$group: {

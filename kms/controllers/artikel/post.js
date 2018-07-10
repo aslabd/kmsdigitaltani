@@ -773,6 +773,7 @@ function PostControllers() {
 				.aggregate([{
 					$match: {
 						penulis: penulis,
+						status: 'terbit'
 					}
 				}, {
 					$group: {

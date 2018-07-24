@@ -16,6 +16,14 @@ router.get('/:id', function(req, res) {
 	user.get(req, res);
 });
 
+router.get('/:id/status', function(req, res) {
+	user.getStatus(req, res);
+});
+
+router.get('/:id/role', function(req, res) {
+	user.getRole(req, res);
+});
+
 router.post('/login', function(req, res) {
 	user.login(req, res);
 });

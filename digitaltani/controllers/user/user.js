@@ -38,7 +38,6 @@ async function createToken(data, res) {
 
 		res.status(200).json({status: true, message: 'Otorisasi berhasil.', data: data, token: token});
 	} catch (err) {
-		console.log(err);
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
 	}
 }
@@ -278,8 +277,8 @@ function UserControllers() {
 							$search: search
 						}
 					})
-					.where('role').equals(role)
 					.where('status').equals(true)
+					.where('role').equals(role)
 					.select({
 						password: 0
 					})
@@ -390,7 +389,7 @@ function UserControllers() {
 					if (user == null || user == 0) {
 						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user, token: auth.token});
+						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
 					}
 				})
 				.catch(function(err) {
@@ -414,7 +413,7 @@ function UserControllers() {
 					if (user == null || user == 0) {
 						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user, token: auth.token});
+						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
 					}
 				})
 				.catch(function(err) {

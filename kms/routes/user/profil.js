@@ -24,7 +24,7 @@ router.get('/pengikut/:user', function(req, res) {
 });
 
 router.put('/ikuti', function(req, res) {
-	profil.ubah(req, res);
+	profil.update(req, res);
 });
 
 router.get('/ikuti/:user/saya', function(req, res) {

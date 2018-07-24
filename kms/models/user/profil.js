@@ -14,7 +14,8 @@ module.exports = new Schema({
 			post: { type: Number, default: null },
 			tanya: { type: Number, default: null },
 			topik: { type: Number, default: null },
-			pengikut: { type: Number, default: null }
+			pengikut: { type: Number, default: null },
+			ikuti: { type: Number, default: null }
 		},
 		saya: {
 			ikuti: { type: Boolean, default: null }

@@ -38,7 +38,9 @@ function MetaControllers () {
 			jumlah: {
 				post: {},
 				tanya: {},
-				topik: {}
+				topik: {},
+				pengikut: {},
+				ikuti: {}
 			},
 			saya: {
 				ikuti: {}
@@ -50,7 +52,9 @@ function MetaControllers () {
 			jumlah: {
 				post: {},
 				tanya: {},
-				topik: {}
+				topik: {},
+				pengikut: {},
+				ikuti: {}
 			},
 			saya: {
 				ikuti: {}
@@ -94,6 +98,24 @@ function MetaControllers () {
 								meta.jumlah.topik = 0;
 							} else {
 								meta.jumlah.topik = temp.jumlah.topik.json.data[0].jumlah_topik;
+							}
+
+							// Ambil jumlah ikuti
+							temp.jumlah.ikuti.call = await fetch(configuration.host + '/user/profil/ikuti/' + user);
+							temp.jumlah.ikuti.json = await temp.jumlah.ikuti.call.json();
+							if (temp.jumlah.ikuti.json.data == 0 || temp.jumlah.ikuti.json.data == null) {
+								meta.jumlah.ikuti = 0;
+							} else {
+								meta.jumlah.ikuti = temp.jumlah.ikuti.json.data.length;
+							}
+
+							// Ambil jumlah ikuti
+							temp.jumlah.pengikut.call = await fetch(configuration.host + '/user/profil/ikuti/' + user);
+							temp.jumlah.pengikut.json = await temp.jumlah.pengikut.call.json();
+							if (temp.jumlah.pengikut.json.data == 0 || temp.jumlah.pengikut.json.data == null) {
+								meta.jumlah.pengikut = 0;
+							} else {
+								meta.jumlah.pengikut = temp.jumlah.pengikut.json.data.length;
 							}
 
 							// Ambil user

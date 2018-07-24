@@ -79,7 +79,9 @@ async function getInfoPenggunaPengikut(pengikuts, res) {
 		try {
 			let user = await fetch(configuration.url.digitaltani + '/user/' + item);
 			let user_json = await user.json();
-			users.push(user_json.data);
+			if (user_json.data.status == true) {
+				users.push(user_json.data);
+			}
 		} catch (err) {
 			break;
 			res.status(500).json({status: false, message: 'Ambil info pengikut gagal.', err: err});
@@ -91,12 +93,13 @@ async function getInfoPenggunaPengikut(pengikuts, res) {
 async function getInfoPenggunaMengikuti(profils, res) {
 	let users = [];
 
-
 	for (let item of profils) {
 		try {
 			let user = await fetch(configuration.url.digitaltani + '/user/' + item.user);
 			let user_json = await user.json();
-			users.push(user_json.data);
+			if (user_json.data.status == true) {
+				users.push(user_json.data);
+			}
 		} catch (err) {
 			break;
 			res.status(500).json({status: false, message: 'Ambil info ikuti gagal.', err: err});

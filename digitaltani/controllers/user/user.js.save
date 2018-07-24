@@ -20,23 +20,29 @@ var UserSchema = require('./../../models/user/user');
 var User = connection.model('User', UserSchema);
 
 // definisikan fungsi untuk membuat token sebagai async/await
-async function createToken(data, res) {
+async function createToken(user, login_type, remember_me, res) {
 	try {
 		let kadaluarsa;
 
-		if (data.remember_me == true) {
+		if (remember_me == true) {
 			// jika remember_me true, maka kadaluarsa 7 hari
 			kadaluarsa = 7 * 24 * 60 * 60;
 		} else {
 			// jika remember_me false, maka kadaluarsa 1 jam
 			kadaluarsa = 60 * 60
 		}
+		let data = {
+			login_type: login_type,
+			remember_me: remember_me
+		}
 
-		let token = await jwt.sign(data, configuration.jwt.secret, {
+		data = Object.assign(data, user)
+
+		let token = await jwt.sign(data, configuration.jwt.secret ,{
 			expiresIn: kadaluarsa
-		});
+		})
 
-		res.status(200).json({status: true, message: 'Otorisasi berhasil.', data: data, token: token});
+		res.status(200).json({status: true, message: 'Otorisasi berhasil.', user: user, token: token});
 	} catch (err) {
 		res.status(500).json({status: false, message: 'Token gagal dibuat.', err: err});
 	}
@@ -47,18 +53,17 @@ var hashPassword = function(password) {
 	return crypto.createHash('sha256').update(password, 'utf8').digest('hex');
 }
 
-// fungsi Controller User
 function UserControllers() {
 	// Ambil semua user
-	this.getAll = async function(req, res) {
-		let auth = await Auth.verify(req);
+	this.getAll = function(req, res) {
+		let auth = authorization.verify(req);
 
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 		let status = option.status;
 
-		let sort = req.params.sort;
+		let sort = JSON.parse(req.params.sort);
 		if (sort = 'z-a') {
 			sort = '-nama'
 		} else {
@@ -134,29 +139,19 @@ function UserControllers() {
 
 	// Ambil semua user
 	this.getAllByRole = async function(req, res) {
-		let auth;
-		try {
-			auth = await Auth.verify(req);
-		} catch (err) {
-			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
-		}
-		
+		let auth = await Auth.verify(req);
+
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
 		let status = option.status;
-		let role = option.role;
+		let role = Number(option.role);
 
 		let sort = req.params.sort;
-		if (sort == 'z-a') {
-			sort = '-username'
-		} else {
-			sort = 'username'
-		}
 
-		if (skip == null || limit == null || role == null) {
+		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth && auth.status == true && [1, 2].includes(auth.data.role)) {	// hanya perbolehkan role 1 (admin) dan role 2 (pemerintah) yang lihat lengkap
+		} else if (auth && auth.status && [1, 2].includes(auth.user.role)) {						// hanya perbolehkan role 1 (admin) dan role 2 (pemerintah) yang lihat lengkap
 			if (status != null) {
 				User
 					.find()
@@ -181,7 +176,6 @@ function UserControllers() {
 				User
 					.find()
 					.where('role').equals(role)
-					.where('status').equals(true)
 					.select({
 						password: 0
 					})
@@ -201,7 +195,7 @@ function UserControllers() {
 		} else {
 			User
 				.find()
-				.where('status').equals(true)
+				.where('status').equals(status)
 				.where('role').equals(role)
 				.select({
 					username: 1,
@@ -224,143 +218,15 @@ function UserControllers() {
 				});
 		}
 	}
-
-	this.getAllByRoleSearch = async function(req, res) {
-		let auth = await Auth.verify(req);
-		
-		let option = JSON.parse(req.params.option);
-		let skip = Number(option.skip);
-		let limit = Number(option.limit);
-		let status = option.status;
-		let role = option.role;
-
-		let sort = req.params.sort;
-		if (sort = 'z-a') {
-			sort = '-nama'
-		} else {
-			sort = 'nama'
-		}
-
-		let search = req.params.search;
-
-		if (skip == null || limit == null || role == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth && auth.status == true && [1, 2].includes(auth.data.role)) {	// hanya perbolehkan role 1 (admin) dan role 2 (pemerintah) yang lihat lengkap
-			if (status != null) {
-				User
-					.find({
-						$text: {
-							$search: search
-						}
-					})
-					.where('status').equals(status)
-					.where('role').equals(role)
-					.select({
-						password: 0
-					})
-					.skip(skip)
-					.limit(limit)
-					.sort(sort)
-					.exec(function(err, user) {
-						if (err) {
-							res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
-						} else if (user == null || user == 0) {
-							res.status(204).json({status: false, message: 'User tidak ditemukan.'});
-						} else {
-							res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user, token: auth.token});
-						}
-					});
-			} else {
-				User
-					.find({
-						$text: {
-							$search: search
-						}
-					})
-					.where('status').equals(true)
-					.where('role').equals(role)
-					.select({
-						password: 0
-					})
-					.skip(skip)
-					.limit(limit)
-					.sort(sort)
-					.exec(function(err, user) {
-						if (err) {
-							res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
-						} else if (user == null || user == 0) {
-							res.status(204).json({status: false, message: 'User tidak ditemukan.'});
-						} else {
-							res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user, token: auth.token});
-						}
-					});
-			}
-		} else {
-			User
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('status').equals(true)
-				.where('role').equals(role)
-				.select({
-					username: 1,
-					'email.address': 1,
-					nama: 1,
-					role: 1,
-					foto: 1
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, user) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Ambil beberapa user gagal.', err: err});
-					} else if (user == null || user == 0) {
-						res.status(204).json({status: false, message: 'User tidak ditemukan.'});
-					} else {
-						res.status(200).json({status: true, message: 'Ambil beberapa user berhasil.', data: user, token: auth.token});
-					}
-				});
-		}
-	}
-
-
 
 	this.get = async function(req, res) {
-		let auth;
-		try {
-			auth = await Auth.verify(req);
-		} catch (err) {
-			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
-		}
+		let auth = await Auth.verify(req);
 
 		let id = req.params.id;
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false || (![1, 2].includes(auth.user.role))) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
-			User
-				.findById(id)
-				.select({
-					username: 1,
-					'email.address': 1,
-					nama: 1,
-					role: 1,
-					foto: 1
-				})
-				.then(function(user) {
-					if (user == null || user == 0) {
-						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
-					} else {
-						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user, token: auth.token});
-					}
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
-				})
-		} else {
+		} else if (auth && auth.status && [1, 2].includes(auth.user.role)) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
 			User
 				.findById(id)
 				.select({
@@ -376,49 +242,21 @@ function UserControllers() {
 				.catch(function(err) {
 					res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
 				})
-		}
-	}
-
-	this.getRole = function(req, res) {
-		let id = req.params.id;
-
-		if (id == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
 			User
 				.findById(id)
 				.select({
-					role: 1
+					username: 1,
+					'email.address': 1,
+					nama: 1,
+					role: 1,
+					foto: 1
 				})
 				.then(function(user) {
 					if (user == null || user == 0) {
 						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
 					} else {
-						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
-					}
-				})
-				.catch(function(err) {
-					res.status(500).json({status: false, message: 'Ambil pengguna gagal.', err: err});
-				})
-		}
-	}
-
-	this.getStatus = function(req, res) {
-		let id = req.params.id;
-
-		if (id == null) {
-			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else {
-			User
-				.findById(id)
-				.select({
-					status: 1
-				})
-				.then(function(user) {
-					if (user == null || user == 0) {
-						res.status(204).json({status: false, message: 'Pengguna tidak ditemukan.'});
-					} else {
-						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user});
+						res.status(200).json({status: true, message: 'Pengguna berhasil ditemukan.', data: user, token: auth.token});
 					}
 				})
 				.catch(function(err) {
@@ -454,6 +292,7 @@ function UserControllers() {
 					} else if(user == null || user == 0) {
 						password = hashPassword(password);
 						
+						let token_verify = createTokenForVerify(data, secret, )
 						User
 							.create({
 								username: username,
@@ -533,17 +372,10 @@ function UserControllers() {
       				if (err) {
       					res.status(500).json({status: false, message: 'Pengguna gagal ditemukan.', err: err})
       				} else if (user == null || user == 0) {
-					res.status(200).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
+            			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
           			} else {
-          				let data = {
-          					login_type: login_type,
-          					remember_me: remember_me
-          				}
-
-          				data = Object.assign(user._doc, data);
-
           				// panggil fungsi membuat token
-          				createToken(data, res);
+          				createToken(user, login_type, remember_me, res);
           			}
           		});
        	}
@@ -559,9 +391,7 @@ function UserControllers() {
 				if (err) {
 					res.status(401).json({status: false, message: 'Token gagal diotentikasi. Silahkan login kembali.', err: err});
 				} else {
-					delete decoded.iat;
-  					delete decoded.exp;
-					createToken(decoded, res);
+					createToken(decoded.user, decoded.login_type, decoded.remember_me, res);
 				}
 			});
 		}

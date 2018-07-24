@@ -386,7 +386,7 @@ function SukaControllers() {
 	}
 
 	// fungsi suka/batal suka artikel
-	this.ubahToPost = async function(req, res) {
+	this.updateToPost = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -476,7 +476,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.ubahToTanya = async function(req, res) {
+	this.updateToTanya = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -566,7 +566,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.ubahToTopik = async function(req, res) {
+	this.updateToTopik = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -656,7 +656,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.ubahToKomentar = async function(req, res) {
+	this.updateToKomentar = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -746,7 +746,7 @@ function SukaControllers() {
 		}
 	}
 
-	this.ubahToBalasan = async function(req, res) {
+	this.updateToBalasan = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);

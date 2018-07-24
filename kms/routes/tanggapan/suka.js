@@ -69,19 +69,19 @@ router.get('/:jenis/:id/:option', function(req, res) {
 router.put('/:jenis/ubah', function(req, res) {
 	if (req.params.jenis == 'artikel') {
 		req.body.id_post = req.body.id;
-		suka.ubahToPost(req, res);
+		suka.updateToPost(req, res);
 	} else if (req.params.jenis == 'diskusi') {
 		req.body.id_tanya = req.body.id;
-		suka.ubahToTanya(req, res);
+		suka.updateToTanya(req, res);
 	} else if (req.params.jenis == 'materi') {
 		req.body.id_topik = req.body.id;
-		suka.ubahToTopik(req, res);
+		suka.updateToTopik(req, res);
 	} else if (req.params.jenis == 'komentar') {
 		req.body.id_komentar = req.body.id;
-		suka.ubahToKomentar(req, res);
+		suka.updateToKomentar(req, res);
 	} else if (req.params.jenis == 'balasan') {
 		req.body.id_balasan = req.body.id;
-		suka.ubahToBalasan(req, res);
+		suka.updateToBalasan(req, res);
 	} else {
 		res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 	}

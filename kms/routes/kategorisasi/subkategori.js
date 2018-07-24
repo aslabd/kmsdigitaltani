@@ -20,6 +20,10 @@ router.post('/tulis', function(req, res) {
 	subkategori.add(req, res);
 });
 
+router.patch('/ubah', function(req, res) {
+	subkategori.update(req, res);
+});
+
 router.delete('/hapus', function(req, res) {
 	subkategori.delete(req, res);
 });

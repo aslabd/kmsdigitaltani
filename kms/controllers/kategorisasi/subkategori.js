@@ -1,4 +1,4 @@
-var jwt = require('jsonwebtoken');
+var Auth = require('./../../auth');
 
 var connection = require('./../../connection');
 
@@ -117,16 +117,23 @@ function SubkategoriControllers() {
 	}
 
 	// Tambah subkategori
-	this.add = function(req, res) {
-		let auth = true;
+	this.add = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 		
 		let meta = req.body.meta;
 		let nama = req.body.nama;
 		let deskripsi = req.body.deskripsi;
 		let kategori = req.body.kategori;
 
-		if (nama == null || nama == 0) {
+		if (nama == null || kategori == null) {
 			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
 		} else {
 			Kategori
 				.findById(kategori)
@@ -169,6 +176,93 @@ function SubkategoriControllers() {
 					res.status(500).json({status: false, message: 'Ambil kategori gagal.', err: err});
 				})
 			
+		}
+	}
+
+	this.update = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+
+		let id = req.body.id;
+		let meta = req.body.meta;
+		let nama = req.body.nama;
+		let deskripsi = req.body.deskripsi;
+		let kategori = req.body.kategori;
+
+		if (id == null || nama == null || kategori == null) {
+			res.status(400).json({status: false, message: 'Ada parameter wajib yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else {
+			Subkategori
+				.findById(id)
+				.then(function(subkategori) {
+					if (subkategori == null || subkategori == 0 || subkategori.status == 'hapus') {
+						res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
+					} else {
+						Subkategori
+							.findByIdAndUpdate(id, {
+								meta: meta,
+								nama: nama,
+								deskripsi: deskripsi,
+								kategori: kategori,
+								'tanggal.ubah': Date.now()
+							})
+							.then(function(subkategori) {
+								res.status(200).json({status: true, message: 'Subkategori berhasil diubah.'});
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Subkategori gagal diubah.', err: err});
+							})
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Subkategori gagal ditemukan.', err: err});
+				})
+		}
+	}
+
+	this.delete = async function(req, res) {
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
+
+		let id = req.body.id;
+
+		if (id == null) {
+			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
+		} else if (auth == false || auth.status == false || (![1].includes(auth.data.role))) {
+			res.status(403).json({status: false, message: 'Tidak dapat akses fungsi.'});
+		} else {
+			Subkategori
+				.findById(id)
+				.then(function(subkategori) {
+					if (subkategori == null || subkategori == 0 || subkategori.status == 'hapus') {
+						res.status(204).json({status: false, message: 'Subkategori tidak ditemukan.'});
+					} else {
+						Subkategori
+							.findByIdAndUpdate(id, {
+								status: 'hapus',
+								'tanggal.hapus': Date.now()
+							})
+							.then(function(subkategori) {
+								res.status(200).json({status: true, message: 'Subkategori berhasil dihapus.'});
+							})
+							.catch(function(err) {
+								res.status(500).json({status: false, message: 'Subkategori gagal dihapus.', err: err})
+							})
+					}
+				})
+				.catch(function(err) {
+					res.status(500).json({status: false, message: 'Subkategori gagal ditemukan.', err: err});
+				})
 		}
 	}
 }

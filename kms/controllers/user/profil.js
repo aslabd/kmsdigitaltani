@@ -26,7 +26,6 @@ async function cekProfil(user) {
 		} catch (err) {
 			throw new Error('Gagal ambil profil.');
 		}
-
 	}
 }
 
@@ -277,10 +276,9 @@ function ProfilControllers() {
 					}
 				})
 		}
-
 	}
 
-	this.ubah = async function(req, res) {
+	this.update = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);

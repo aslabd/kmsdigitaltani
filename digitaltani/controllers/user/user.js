@@ -340,7 +340,7 @@ function UserControllers() {
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth == false || auth.status == false || (![1, 2].includes(auth.user.role))) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
+		} else if (auth == false || auth.status == false || (![1, 2].includes(auth.data.role))) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
 			User
 				.findById(id)
 				.select({

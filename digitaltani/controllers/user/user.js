@@ -529,7 +529,7 @@ function UserControllers() {
       				if (err) {
       					res.status(500).json({status: false, message: 'Pengguna gagal ditemukan.', err: err})
       				} else if (user == null || user == 0) {
-            			res.status(204).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
+					res.status(200).json({status: false, message: 'Pengguna tidak ditemukan. Username atau password salah.'});
           			} else {
           				let data = {
           					login_type: login_type,

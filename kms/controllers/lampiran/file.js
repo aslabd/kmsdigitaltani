@@ -160,6 +160,7 @@ function FileControllers() {
 						jenis = 'materi';
 						direktori = path.resolve('uploads/materi/');
 					}
+				console.log(file)
 			    	cb(null, direktori)
 				},
 				filename: function (req, file, cb) {
@@ -174,10 +175,11 @@ function FileControllers() {
 			let upload = multer({
 				storage: storage,
 				fileFilter: function(req, file, cb) {
+console.log(file);
 					ukuran = file.size;
 					extension = path.extname(file.originalname).toLowerCase();
-					if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension))) {
-		            	return cb(new Error('File kosong atau format file tidak diizinkan.'));
+					if (!(allowed_mimetypes.includes(file.mimetype)) || !(allowed_extensions.includes(extension)))  {
+						return cb(new Error('File kosong atau format file tidak diizinkan.'));
 					} else {
 						cb(null, true)
 					}
@@ -193,6 +195,7 @@ function FileControllers() {
 					if (err.code == 'LIMIT_FILE_SIZE') {
 						res.status(400).json({status: false, message: 'File berukuran melebihi yang diizinkan.', err: err});
 					} else {
+						console.log(err);
 						res.status(500).json({status: false, message: 'File gagal diunggah.', err: err});
 					}
 				} else if (req.file == null || req.file == 0) {

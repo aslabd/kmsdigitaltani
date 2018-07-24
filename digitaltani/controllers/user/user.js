@@ -115,6 +115,7 @@ function UserControllers() {
 					'email.address': 1,
 					nama: 1,
 					role: 1,
+					status: 1,
 					foto: 1
 				})
 				.skip(skip)
@@ -208,6 +209,7 @@ function UserControllers() {
 					'email.address': 1,
 					nama: 1,
 					role: 1,
+					status: 1,
 					foto: 1
 				})
 				.skip(skip)
@@ -309,6 +311,7 @@ function UserControllers() {
 					'email.address': 1,
 					nama: 1,
 					role: 1,
+					status: 1,
 					foto: 1
 				})
 				.skip(skip)
@@ -348,6 +351,7 @@ function UserControllers() {
 					'email.address': 1,
 					nama: 1,
 					role: 1,
+					status: 1,
 					foto: 1
 				})
 				.then(function(user) {

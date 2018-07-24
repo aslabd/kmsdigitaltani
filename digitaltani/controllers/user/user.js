@@ -329,17 +329,26 @@ function UserControllers() {
 
 
 	this.get = async function(req, res) {
-		let auth = await Auth.verify(req);
+		let auth;
+		try {
+			auth = await Auth.verify(req);
+		} catch (err) {
+			res.status(401).json({status: false, message: 'Gagal otentikasi.'});
+		}
 
 		let id = req.params.id;
 
 		if (id == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
-		} else if (auth && auth.status && [1, 2].includes(auth.user.role)) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
+		} else if (auth == false || auth.status == false || (![1, 2].includes(auth.user.role))) {	// jika auth tidak bermasalah dan statusnya benar, serta role pengakses fungsi sesuai
 			User
 				.findById(id)
 				.select({
-					password: 0
+					username: 1,
+					'email.address': 1,
+					nama: 1,
+					role: 1,
+					foto: 1
 				})
 				.then(function(user) {
 					if (user == null || user == 0) {
@@ -355,11 +364,7 @@ function UserControllers() {
 			User
 				.findById(id)
 				.select({
-					username: 1,
-					'email.address': 1,
-					nama: 1,
-					role: 1,
-					foto: 1
+					password: 0
 				})
 				.then(function(user) {
 					if (user == null || user == 0) {

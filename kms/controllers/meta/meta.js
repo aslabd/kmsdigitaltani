@@ -102,19 +102,19 @@ function MetaControllers () {
 
 							// Ambil jumlah ikuti
 							temp.jumlah.ikuti.call = await fetch(configuration.host + '/user/profil/ikuti/' + user);
-							temp.jumlah.ikuti.json = await temp.jumlah.ikuti.call.json();
 							if (temp.jumlah.ikuti.call.status == 204 || temp.jumlah.ikuti.json.data == 0 || temp.jumlah.ikuti.json.data == null) {
 								meta.jumlah.ikuti = 0;
 							} else {
+								temp.jumlah.ikuti.json = await temp.jumlah.ikuti.call.json();
 								meta.jumlah.ikuti = temp.jumlah.ikuti.json.data.length;
 							}
 
 							// Ambil jumlah ikuti
 							temp.jumlah.pengikut.call = await fetch(configuration.host + '/user/profil/ikuti/' + user);
-							temp.jumlah.pengikut.json = await temp.jumlah.pengikut.call.json();
 							if (temp.jumlah.ikuti.call.status == 204 || temp.jumlah.pengikut.json.data == 0 || temp.jumlah.pengikut.json.data == null) {
 								meta.jumlah.pengikut = 0;
 							} else {
+								temp.jumlah.pengikut.json = await temp.jumlah.pengikut.call.json();
 								meta.jumlah.pengikut = temp.jumlah.pengikut.json.data.length;
 							}
 

@@ -267,7 +267,6 @@ function ProfilControllers() {
 							.where('user').equals(user)
 							.where('pengikut').in([pengikut])
 							.exec(function(err, ikuti) {
-								console.log(profil)
 								if (err) {
 									res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
 								} else if (ikuti == null || ikuti == 0) {
@@ -316,7 +315,6 @@ function ProfilControllers() {
 							.where('user').equals(user)
 							.where('pengikut').in([pengikut])
 							.exec(function(err, ikuti) {
-								console.log(profil)
 								if (err) {
 									res.status(500).json({status: false, message: 'Ambil profil gagal.', err: err});
 								} else if (ikuti == null || ikuti == 0) {

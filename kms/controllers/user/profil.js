@@ -109,7 +109,7 @@ async function getInfoPenggunaMengikuti(profils, res) {
 }
 
 function ProfilControllers() {
-	this.getAllBySayaMengikuti = async function(req, res) {
+	this.checkIkuti = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -130,7 +130,7 @@ function ProfilControllers() {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil profil pengguna gagal.', err: err});
 					} else if (profil == null || profil == 0) {
-						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
+						res.status(200).json({status: true, message: 'Profil pengguna tidak ditemukan.', data: []})
 					} else {
 						getInfoPenggunaMengikuti(profil, res)
 					}
@@ -138,7 +138,7 @@ function ProfilControllers() {
 		}
 	}
 
-	this.getAllBySayaPengikut = async function(req, res) {
+	this.checkPengikut = async function(req, res) {
 		let auth;
 		try {
 			auth = await Auth.verify(req);
@@ -158,9 +158,9 @@ function ProfilControllers() {
 				.where('user').equals(user)
 				.exec(function(err, profil) {
 					if (err) {
-						res.status(500).json({status: true, message: 'Ambil profil gagal.', err: err});
+						res.status(500).json({status: true, message: 'Ambil profil pengguna gagal.', err: err});
 					} else if (profil == null || profil == 0) {
-						res.status(204).json({status: true, message: 'Profil tidak ditemukan..'});
+						res.status(200).json({status: true, message: 'Profil pengguna tidak ditemukan.', data: []})
 					} else {
 						getInfoPenggunaPengikut(profil.pengikut, res);
 					}
@@ -168,7 +168,7 @@ function ProfilControllers() {
 		}
 	}
 
-	this.getAllByPengikutMengikuti = function(req, res) {
+	this.getAllIkuti = function(req, res) {
 		let pengikut = req.params.pengikut;
 
 		if (pengikut == null) {
@@ -182,7 +182,7 @@ function ProfilControllers() {
 					if (err) {
 						res.status(500).json({status: false, message: 'Ambil profil pengguna gagal.', err: err});
 					} else if (profil == null || profil == 0) {
-						res.status(204).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
+						res.status(200).json({status: false, message: 'Profil pengguna tidak ditemukan.'})
 					} else {
 						getInfoPenggunaMengikuti(profil, res)
 					}
@@ -190,7 +190,7 @@ function ProfilControllers() {
 		}
 	}
 
-	this.getAllByUserPengikut = async function(req, res) {
+	this.getAllPengikut = async function(req, res) {
 		let user = req.params.user;
 
 		if (user == null) {

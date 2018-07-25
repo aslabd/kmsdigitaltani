@@ -7,20 +7,20 @@ router.get('/:user', function(req, res) {
 	profil.getByUser(req, res);
 });
 
-router.get('/saya/ikuti/', function(req, res) {
-	profil.getAllBySayaMengikuti(req, res);
-});
-
-router.get('/saya/pengikut/', function(req, res) {
-	profil.getAllBySayaPengikut(req, res);
-});
-
 router.get('/ikuti/:pengikut', function(req, res) {
-	profil.getAllByPengikutMengikuti(req, res);
+	profil.getAllIkuti(req, res);
 });
 
 router.get('/pengikut/:user', function(req, res) {
-	profil.getAllByUserPengikut(req, res);
+	profil.getAllPengikut(req, res);
+});
+
+router.get('/ikuti/:pengikut/cek', function(req, res) {
+	profil.getAllIkuti(req, res);
+});
+
+router.get('/pengikut/:user/cek', function(req, res) {
+	profil.getAllPengikut(req, res);
 });
 
 router.put('/ikuti', function(req, res) {

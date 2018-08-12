@@ -70,6 +70,7 @@ function TopikControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = option.subkategori;
 
 		let sort = req.params.sort;
 		if (sort == 'terlama') {
@@ -81,27 +82,53 @@ function TopikControllers() {
 		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Topik
-				.find()
-				.where('status').equals('terbit')
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					materi: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, topik) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Ambil beberapa materi gagal.', err: err});
-					} else if (topik == null || topik == 0) {
-						res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
-					} else {
-						getMetaForTopiks(req, topik, res);
-					}
-				})
+			if (subkategori != null) {
+				Topik
+					.find()
+					.where('status').equals('terbit')
+					.where('subkategori').equals(subkategori)
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						materi: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, topik) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Ambil beberapa materi gagal.', err: err});
+						} else if (topik == null || topik == 0) {
+							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
+						} else {
+							getMetaForTopiks(req, topik, res);
+						}
+					})
+			} else {
+				Topik
+					.find()
+					.where('status').equals('terbit')
+					.where('subkategori').equals(subkategori)
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						materi: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, topik) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Ambil beberapa materi gagal.', err: err});
+						} else if (topik == null || topik == 0) {
+							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
+						} else {
+							getMetaForTopiks(req, topik, res);
+						}
+					})
+			}
 		}
 	}
 
@@ -305,6 +332,7 @@ function TopikControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = option.subkategori;
 
 		let sort = req.params.sort;
 		if (sort == 'terlama') {
@@ -320,31 +348,60 @@ function TopikControllers() {
 		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Topik
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('status').equals('terbit')
-				.populate('subkategori', 'nama')
-				.select({
-					suka: 0,
-					komentar: 0,
-					materi: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, topik) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
-					} else if (topik == null || topik == 0) {
-						res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
-					} else {
-						getMetaForTopiks(req, topik, res);
-					}
-				});
+			if (subkategori != null) {
+				Topik
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('status').equals('terbit')
+					.where('subkategori').equals(subkategori)
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0,
+						materi: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, topik) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
+						} else if (topik == null || topik == 0) {
+							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
+						} else {
+							getMetaForTopiks(req, topik, res);
+						}
+					});
+			} else {
+				Topik
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('status').equals('terbit')
+					.populate('subkategori', 'nama')
+					.select({
+						suka: 0,
+						komentar: 0,
+						materi: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, topik) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Ambil materi gagal.', err: err});
+						} else if (topik == null || topik == 0) {
+							res.status(204).json({status: false, message: 'Materi tidak ditemukan.'});
+						} else {
+							getMetaForTopiks(req, topik, res);
+						}
+					});
+			}
 		}
 	}
 

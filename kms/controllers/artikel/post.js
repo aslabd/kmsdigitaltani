@@ -79,6 +79,7 @@ function PostControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = option.subkategori;
 
 		let sort = req.params.sort;
 		if (sort== 'terlama') {
@@ -90,28 +91,54 @@ function PostControllers() {
 		if (skip == null || limit == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Post
-				.find()
-				.where('status').equals('terbit')
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
+			if (subkategori != null) {
+				Post
+					.find()
+					.where('status').equals('terbit')
+					.where('subkategori').equals(subkategori)
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			} else {
+				Post
+					.find()
+					.where('status').equals('terbit')
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			}
 		}
 	}
 
@@ -318,6 +345,7 @@ function PostControllers() {
 		let option = JSON.parse(req.params.option);
 		let skip = Number(option.skip);
 		let limit = Number(option.limit);
+		let subkategori = option.subkategori;
 
 		let sort = req.params.sort;
 		if (sort == 'terlama') {
@@ -333,32 +361,62 @@ function PostControllers() {
 		if (skip == null || limit == null || search == null) {
 			res.status(400).json({status: false, message: 'Ada parameter yang kosong.'});
 		} else {
-			Post
-				.find({
-					$text: {
-						$search: search
-					}
-				})
-				.where('status').equals('terbit')
-				.populate('subkategori', 'nama')
-				.select({
-					'meta.isi': 0,
-					isi: 0,
-					suka: 0,
-					komentar: 0
-				})
-				.skip(skip)
-				.limit(limit)
-				.sort(sort)
-				.exec(function(err, post) {
-					if (err) {
-						res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
-					} else if (post == null || post == 0) {
-						res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
-					} else {
-						getMetaForPosts(req, post, res);
-					}
-				});
+			if (subkategori != null) {
+				Post
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('status').equals('terbit')
+					.where('subkategori').equals(subkategori)
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			} else {
+				Post
+					.find({
+						$text: {
+							$search: search
+						}
+					})
+					.where('status').equals('terbit')
+					.populate('subkategori', 'nama')
+					.select({
+						'meta.isi': 0,
+						isi: 0,
+						suka: 0,
+						komentar: 0
+					})
+					.skip(skip)
+					.limit(limit)
+					.sort(sort)
+					.exec(function(err, post) {
+						if (err) {
+							res.status(500).json({status: false, message: 'Artikel gagal ditemukan.', err: err});
+						} else if (post == null || post == 0) {
+							res.status(204).json({status: false, message: 'Artikel tidak ditemukan.'});
+						} else {
+							getMetaForPosts(req, post, res);
+						}
+					});
+			}
 		}
 	}
 

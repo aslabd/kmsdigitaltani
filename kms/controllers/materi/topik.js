@@ -86,7 +86,7 @@ function TopikControllers() {
 				Topik
 					.find()
 					.where('status').equals('terbit')
-			
+					.where('subkategori').equals(subkategori)
 					.populate('subkategori', 'nama')
 					.select({
 						suka: 0,
@@ -109,7 +109,6 @@ function TopikControllers() {
 				Topik
 					.find()
 					.where('status').equals('terbit')
-					.where('subkategori').equals(subkategori)
 					.populate('subkategori', 'nama')
 					.select({
 						suka: 0,
